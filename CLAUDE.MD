@@ -4,7 +4,7 @@
 
 Openbulls is an AI-powered finance, portfolio tracking, market-data, automation, and reporting platform.
 
-The project is a TypeScript monorepo using Turborepo, pnpm, Next.js, Drizzle ORM, PostgreSQL, Better Auth, Vercel AI SDK, and modular domain packages.
+The project is a TypeScript monorepo using Turborepo, pnpm, Next.js, Drizzle ORM, PostgreSQL, Better Auth, Vercel AI SDK / Vercel AI Gateway, LangChain, and LangGraph.
 
 ## Language
 
@@ -22,19 +22,72 @@ Build Openbulls as a scalable monorepo with:
 - Financial statement analysis
 - Technical indicators
 - User credit / billing system
-- Resumable AI agent workflows
+- LangGraph-based resumable AI agent workflows
+- Parallel agent execution
 - User-created scheduled jobs
 - Telegram / web / email notifications
 - PDF / Excel reporting
 
+## Core Runtime Decision
+
+Openbulls uses **LangGraph** as the central agent workflow runtime.
+
+LangGraph is responsible for:
+
+- long-running agent workflows
+- parallel agent execution
+- stateful graph execution
+- durable execution
+- checkpointing
+- resumable agent runs
+- human-in-the-loop approval
+- multi-agent orchestration
+- graph node execution
+- graph state persistence
+
+LangChain is used for:
+
+- model abstraction
+- tool binding
+- prompt templates
+- retrievers where needed
+- integration with LangGraph agents
+
+Vercel AI SDK / Vercel AI Gateway is used for:
+
+- model access
+- provider routing
+- streaming responses in the web app
+- AI Gateway observability
+- model pricing and provider fallback
+
+Do not implement a fully custom agent state machine unless LangGraph cannot support the use case.
+
+Prefer this separation:
+
+```txt
+packages/ai
+  model gateway, prompt, tool definitions, telemetry
+
+packages/agent-runtime
+  LangGraph graphs, nodes, state, checkpointing, graph execution
+
+apps/agent-worker
+  executes queued LangGraph runs
+
+packages/jobs
+  queue abstraction only
+```
+
 ## Current Architecture
 
-The repository should follow this high-level structure: See @Structure.md
+The repository should follow this high-level structure:
 
 ```txt
 apps/
   web/
   cron/
+  agent-worker/
   telegram-bot/
 
 packages/
@@ -45,6 +98,7 @@ packages/
   portfolio/
   market-data/
   ai/
+  agent-runtime/
   automation/
   billing/
   notifications/
@@ -66,11 +120,64 @@ Apps should mostly contain:
 - API handlers
 - UI composition
 - app-level wiring
-- entrypoints
+- process entrypoints
 
 Business logic should live in packages.
 
-### 2. Packages own business logic
+### 2. Web app should not run long workflows
+
+`apps/web` should not execute long-running agent workflows directly.
+
+Correct flow:
+
+```txt
+apps/web
+  -> create chat message / create agent run
+  -> enqueue LangGraph run
+  -> stream short response when appropriate
+  -> apps/agent-worker executes long workflow
+```
+
+### 3. Agent worker executes LangGraph runs
+
+`apps/agent-worker` is responsible for queued long-running work:
+
+- LangGraph runs
+- resumable workflows
+- scheduled job execution
+- report generation
+- notification dispatch
+- market data refresh job processing
+
+Do not move long-running agent execution into `apps/web`.
+
+### 4. Cron must be generic
+
+Do not create hard-coded cron jobs like:
+
+```txt
+daily-portfolio-review.job.ts
+```
+
+Instead:
+
+- `apps/cron` only finds due jobs and enqueues them.
+- User scheduled jobs are stored in DB.
+- `packages/automation` decides which executor runs.
+- Executors may enqueue LangGraph runs through `packages/jobs`.
+
+Correct flow:
+
+```txt
+apps/cron
+  -> enqueueDueUserScheduledJobs()
+  -> packages/automation
+  -> packages/jobs
+  -> apps/agent-worker
+  -> packages/agent-runtime
+```
+
+### 5. Packages own business logic
 
 Domain and application logic should live under packages.
 
@@ -88,32 +195,7 @@ package-name/
    └─ infrastructure/
 ```
 
-### 3. Cron must be generic
-
-Do not create hard-coded cron jobs like:
-
-```txt
-daily-portfolio-review.job.ts
-```
-
-Instead:
-
-- `apps/cron` only runs due jobs.
-- User scheduled jobs are stored in DB.
-- `packages/automation` decides which executor runs.
-- Executors are selected by job type.
-
-Correct flow:
-
-```txt
-apps/cron
-  -> runDueUserScheduledJobs()
-  -> packages/automation
-  -> executor-registry
-  -> specific executor
-```
-
-### 4. Market data is its own package
+### 6. Market data is its own package
 
 Do not hide market data under `integrations`.
 
@@ -128,7 +210,7 @@ The `packages/market-data` package owns:
 - market news
 - KAP / SEC / Yahoo / Twelve Data / TCMB provider adapters
 
-### 5. Integrations is only generic external integration glue
+### 7. Integrations is only generic external integration glue
 
 `packages/integrations` should contain generic integration utilities such as:
 
@@ -139,7 +221,7 @@ The `packages/market-data` package owns:
 
 Market data providers should stay in `packages/market-data`.
 
-### 6. AI tools should call package services
+### 8. AI tools should call package services
 
 AI tools should not directly contain business logic.
 
@@ -151,7 +233,44 @@ ai tool -> market-data application query
 ai tool -> automation command
 ```
 
-### 7. Billing must be central
+### 9. Agent runtime owns graph orchestration
+
+Use `packages/agent-runtime` for:
+
+- LangGraph graph definitions
+- graph nodes
+- graph state
+- graph registry
+- graph runner
+- graph checkpointing
+- graph snapshots
+- subagents
+- human-in-the-loop nodes
+
+Do not place LangGraph graph definitions directly inside `apps/web` or `apps/agent-worker`.
+
+### 10. Parallel agents should be modeled as graph branches
+
+For company analysis, portfolio review, deep research, and report generation, use LangGraph branching / subgraphs instead of ad-hoc `Promise.all` orchestration scattered across services.
+
+Example:
+
+```txt
+company-analysis.graph.ts
+
+START
+  -> load-company
+  -> parallel:
+       financial-statement.subagent
+       technical-analysis.subagent
+       market-news.subagent
+       portfolio-impact.subagent
+  -> synthesize-company-analysis
+  -> report-writer.subagent
+  -> END
+```
+
+### 11. Billing must be central
 
 Credit checks should not be scattered inside routes.
 
@@ -165,7 +284,15 @@ Use `packages/billing` for:
 - model cost calculation
 - markup calculation
 
-### 8. Agent runs must be resumable
+Agent workflows should include billing nodes or billing guards:
+
+```txt
+reserve-credit.node.ts
+finalize-usage.node.ts
+pause-credit-insufficient.node.ts
+```
+
+### 12. Agent runs must be resumable
 
 Long-running agent workflows should be persisted.
 
@@ -176,11 +303,12 @@ ai_agent_runs
 ai_agent_run_steps
 ai_tool_calls
 ai_usage_events
+agent_graph_snapshots
 ```
 
-If credit ends during step 5, the run should pause and resume later from step 6.
+If credit ends during step 5, the run should pause and resume later from the next valid graph checkpoint.
 
-### 9. TypeScript rules
+### 13. TypeScript rules
 
 Use TypeScript strictly.
 
@@ -193,7 +321,7 @@ Prefer:
 - no `any` unless unavoidable
 - no business logic in React components
 
-### 10. Database rules
+### 14. Database rules
 
 Use Drizzle ORM.
 
@@ -211,11 +339,11 @@ packages/db/src/repositories/
 
 Domain packages should depend on repository ports, not directly on Drizzle where possible.
 
-### 11. UI rules
+### 15. UI rules
 
 Use:
 
-- Next.js App Router latest
+- Next.js App Router
 - shadcn/ui
 - Tailwind
 - ai-elements for chat UI
@@ -233,7 +361,7 @@ Shared UI components live in:
 packages/ui/
 ```
 
-### 12. Package build rules
+### 16. Package build rules
 
 Each buildable package should have:
 
@@ -246,7 +374,7 @@ src/index.ts
 
 Use `tsup` for package builds.
 
-### 13. Naming
+### 17. Naming
 
 Use kebab-case for files:
 
@@ -254,6 +382,8 @@ Use kebab-case for files:
 portfolio-health.service.ts
 get-portfolio-overview.query.ts
 add-transaction.command.ts
+portfolio-review.graph.ts
+reserve-credit.node.ts
 ```
 
 Use PascalCase for classes and types:
@@ -262,11 +392,13 @@ Use PascalCase for classes and types:
 PortfolioHealthService
 GetPortfolioOverviewQuery
 AddTransactionCommand
+PortfolioReviewGraph
+ReserveCreditNode
 ```
 
 Use camelCase for functions and variables.
 
-### 14. Code generation style
+### 18. Code generation style
 
 When generating code:
 
@@ -277,9 +409,7 @@ When generating code:
 - do not rewrite unrelated files
 - explain only after code when needed
 
-### 15. Commands
-
-Common commands:
+### 19. Common commands
 
 ```bash
 pnpm install
@@ -293,15 +423,43 @@ pnpm db:migrate
 pnpm db:studio
 ```
 
-### 16. Current Focus
+### 20. LangChain / LangGraph dependencies
+
+For the agent runtime package, prefer these dependencies:
+
+```json
+{
+  "dependencies": {
+    "@langchain/core": "latest",
+    "@langchain/langgraph": "latest",
+    "@langchain/openai": "latest",
+    "langchain": "latest"
+  }
+}
+```
+
+Add provider-specific LangChain packages only when needed:
+
+```json
+{
+  "dependencies": {
+    "@langchain/anthropic": "latest",
+    "@langchain/google-genai": "latest"
+  }
+}
+```
+
+### 21. Current Focus
 
 The current focus is building a strong monorepo architecture for Openbulls before implementing all features.
 
 Prioritize:
 
 1. clean package boundaries
-2. database schema consistency
-3. billing and credit safety
-4. AI orchestration abstraction
+2. LangGraph-centered agent runtime
+3. database schema consistency
+4. billing and credit safety
 5. market-data separation
 6. scheduled jobs as user-created DB records
+7. agent-worker for long-running workflows
+8. AI SDK / Gateway for model access and streaming UX

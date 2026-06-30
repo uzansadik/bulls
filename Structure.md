@@ -84,13 +84,35 @@ openbulls/
 │  │  ├─ src/
 │  │  │  ├─ index.ts
 │  │  │  ├─ runners/
-│  │  │  │  └─ run-due-user-scheduled-jobs.ts
-│  │  │  ├─ workers/
-│  │  │  │  └─ scheduled-jobs.worker.ts
+│  │  │  │  └─ enqueue-due-user-scheduled-jobs.ts
 │  │  │  └─ health/
 │  │  │     └─ healthcheck.ts
 │  │  ├─ package.json
-│  │  └─ tsconfig.json
+│  │  ├─ tsconfig.json
+│  │  └─ tsup.config.ts
+│  │
+│  ├─ agent-worker/
+│  │  ├─ src/
+│  │  │  ├─ index.ts
+│  │  │  ├─ workers/
+│  │  │  │  ├─ langgraph-run.worker.ts
+│  │  │  │  ├─ scheduled-job.worker.ts
+│  │  │  │  ├─ portfolio-review.worker.ts
+│  │  │  │  ├─ report-generation.worker.ts
+│  │  │  │  ├─ market-data-refresh.worker.ts
+│  │  │  │  └─ notification.worker.ts
+│  │  │  ├─ processors/
+│  │  │  │  ├─ langgraph-run.processor.ts
+│  │  │  │  ├─ scheduled-job.processor.ts
+│  │  │  │  ├─ portfolio-review.processor.ts
+│  │  │  │  ├─ report-generation.processor.ts
+│  │  │  │  ├─ market-data-refresh.processor.ts
+│  │  │  │  └─ notification.processor.ts
+│  │  │  └─ health/
+│  │  │     └─ healthcheck.ts
+│  │  ├─ package.json
+│  │  ├─ tsconfig.json
+│  │  └─ tsup.config.ts
 │  │
 │  └─ telegram-bot/
 │     ├─ src/
@@ -103,7 +125,8 @@ openbulls/
 │     │  └─ adapters/
 │     │     └─ telegram.adapter.ts
 │     ├─ package.json
-│     └─ tsconfig.json
+│     ├─ tsconfig.json
+│     └─ tsup.config.ts
 │
 ├─ packages/
 │  ├─ db/
@@ -316,83 +339,129 @@ openbulls/
 │  │  └─ package.json
 │  │
 │  ├─ ai/
-│  │  ├─ src/
-│  │  │  ├─ index.ts
-│  │  │  ├─ gateway/
-│  │  │  │  ├─ model-registry.ts
-│  │  │  │  ├─ provider-registry.ts
-│  │  │  │  ├─ gateway-client.ts
-│  │  │  │  └─ model-pricing.ts
-│  │  │  ├─ orchestrator/
-│  │  │  │  ├─ ai-orchestrator.ts
-│  │  │  │  ├─ agent-runner.ts
-│  │  │  │  ├─ resumable-agent-runner.ts
-│  │  │  │  ├─ agent-state-machine.ts
-│  │  │  │  └─ agent-context-builder.ts
-│  │  │  ├─ agents/
-│  │  │  │  ├─ base/
-│  │  │  │  │  ├─ bulls-agent.interface.ts
-│  │  │  │  │  ├─ agent-input.ts
-│  │  │  │  │  ├─ agent-output.ts
-│  │  │  │  │  └─ agent-step.ts
-│  │  │  │  ├─ portfolio-advisor.agent.ts
-│  │  │  │  ├─ financial-statement.agent.ts
-│  │  │  │  ├─ technical-analysis.agent.ts
-│  │  │  │  ├─ report-writer.agent.ts
-│  │  │  │  ├─ research.agent.ts
-│  │  │  │  ├─ risk-profile.agent.ts
-│  │  │  │  └─ router.agent.ts
-│  │  │  ├─ workflows/
-│  │  │  │  ├─ portfolio-review.workflow.ts
-│  │  │  │  ├─ company-analysis.workflow.ts
-│  │  │  │  ├─ technical-analysis.workflow.ts
-│  │  │  │  ├─ deep-research.workflow.ts
-│  │  │  │  ├─ transaction-capture.workflow.ts
-│  │  │  │  └─ report-generation.workflow.ts
-│  │  │  ├─ tools/
-│  │  │  │  ├─ registry/
-│  │  │  │  │  ├─ tool-registry.ts
-│  │  │  │  │  ├─ tool-selector.ts
-│  │  │  │  │  └─ tool-permissions.ts
-│  │  │  │  ├─ portfolio/
-│  │  │  │  │  ├─ add-transaction.tool.ts
-│  │  │  │  │  ├─ get-portfolio-overview.tool.ts
-│  │  │  │  │  ├─ get-positions.tool.ts
-│  │  │  │  │  └─ calculate-portfolio-health.tool.ts
-│  │  │  │  ├─ market-data/
-│  │  │  │  │  ├─ get-delayed-price.tool.ts
-│  │  │  │  │  ├─ get-price-history.tool.ts
-│  │  │  │  │  ├─ get-fx-rate.tool.ts
-│  │  │  │  │  ├─ get-technical-indicators.tool.ts
-│  │  │  │  │  ├─ get-financial-ratios.tool.ts
-│  │  │  │  │  └─ search-market-news.tool.ts
-│  │  │  │  ├─ financials/
-│  │  │  │  │  ├─ get-financial-statement.tool.ts
-│  │  │  │  │  ├─ get-income-statement.tool.ts
-│  │  │  │  │  ├─ get-balance-sheet.tool.ts
-│  │  │  │  │  ├─ get-cash-flow.tool.ts
-│  │  │  │  │  └─ analyze-financial-statement.tool.ts
-│  │  │  │  └─ automation/
-│  │  │  │     ├─ create-scheduled-job.tool.ts
-│  │  │  │     ├─ pause-scheduled-job.tool.ts
-│  │  │  │     └─ list-scheduled-jobs.tool.ts
-│  │  │  ├─ memory/
-│  │  │  │  ├─ user-memory.service.ts
-│  │  │  │  ├─ conversation-memory.service.ts
-│  │  │  │  ├─ investment-preference-memory.ts
-│  │  │  │  └─ memory-policy.ts
-│  │  │  ├─ prompts/
-│  │  │  │  ├─ system/
-│  │  │  │  │  ├─ default-system.prompt.ts
-│  │  │  │  │  ├─ finance-system.prompt.ts
-│  │  │  │  │  └─ safety.prompt.ts
-│  │  │  │  ├─ agents/
-│  │  │  │  └─ workflows/
-│  │  │  └─ telemetry/
-│  │  │     ├─ ai-usage-extractor.ts
-│  │  │     ├─ ai-event-recorder.ts
-│  │  │     └─ source-normalizer.ts
-│  │  └─ package.json
+│  │  ├─ package.json
+│  │  ├─ tsconfig.json
+│  │  ├─ tsup.config.ts
+│  │  └─ src/
+│  │     ├─ index.ts
+│  │     ├─ gateway/
+│  │     │  ├─ vercel-ai-gateway.client.ts
+│  │     │  ├─ langchain-model.factory.ts
+│  │     │  ├─ ai-sdk-model.factory.ts
+│  │     │  ├─ model-registry.ts
+│  │     │  ├─ provider-registry.ts
+│  │     │  └─ model-pricing.ts
+│  │     ├─ tools/
+│  │     │  ├─ registry/
+│  │     │  │  ├─ tool-registry.ts
+│  │     │  │  ├─ tool-selector.ts
+│  │     │  │  └─ tool-permissions.ts
+│  │     │  ├─ portfolio/
+│  │     │  │  ├─ add-transaction.tool.ts
+│  │     │  │  ├─ get-portfolio-overview.tool.ts
+│  │     │  │  ├─ get-positions.tool.ts
+│  │     │  │  └─ calculate-portfolio-health.tool.ts
+│  │     │  ├─ market-data/
+│  │     │  │  ├─ get-delayed-price.tool.ts
+│  │     │  │  ├─ get-price-history.tool.ts
+│  │     │  │  ├─ get-fx-rate.tool.ts
+│  │     │  │  ├─ get-technical-indicators.tool.ts
+│  │     │  │  ├─ get-financial-ratios.tool.ts
+│  │     │  │  └─ search-market-news.tool.ts
+│  │     │  ├─ financials/
+│  │     │  │  ├─ get-financial-statement.tool.ts
+│  │     │  │  ├─ get-income-statement.tool.ts
+│  │     │  │  ├─ get-balance-sheet.tool.ts
+│  │     │  │  ├─ get-cash-flow.tool.ts
+│  │     │  │  └─ analyze-financial-statement.tool.ts
+│  │     │  └─ automation/
+│  │     │     ├─ create-scheduled-job.tool.ts
+│  │     │     ├─ pause-scheduled-job.tool.ts
+│  │     │     └─ list-scheduled-jobs.tool.ts
+│  │     ├─ prompts/
+│  │     │  ├─ system/
+│  │     │  │  ├─ default-system.prompt.ts
+│  │     │  │  ├─ finance-system.prompt.ts
+│  │     │  │  └─ safety.prompt.ts
+│  │     │  ├─ agents/
+│  │     │  └─ workflows/
+│  │     ├─ memory/
+│  │     │  ├─ user-memory.service.ts
+│  │     │  ├─ conversation-memory.service.ts
+│  │     │  ├─ investment-preference-memory.ts
+│  │     │  └─ memory-policy.ts
+│  │     └─ telemetry/
+│  │        ├─ ai-usage-extractor.ts
+│  │        ├─ ai-event-recorder.ts
+│  │        └─ source-normalizer.ts
+│  │
+│  ├─ agent-runtime/
+│  │  ├─ package.json
+│  │  ├─ tsconfig.json
+│  │  ├─ tsup.config.ts
+│  │  └─ src/
+│  │     ├─ index.ts
+│  │     ├─ langgraph/
+│  │     │  ├─ graph-registry.ts
+│  │     │  ├─ graph-runner.ts
+│  │     │  ├─ graph-checkpointer.ts
+│  │     │  ├─ graph-state.ts
+│  │     │  ├─ graph-context.ts
+│  │     │  └─ graph-events.ts
+│  │     ├─ graphs/
+│  │     │  ├─ portfolio-review.graph.ts
+│  │     │  ├─ company-analysis.graph.ts
+│  │     │  ├─ technical-analysis.graph.ts
+│  │     │  ├─ deep-research.graph.ts
+│  │     │  ├─ transaction-capture.graph.ts
+│  │     │  └─ report-generation.graph.ts
+│  │     ├─ nodes/
+│  │     │  ├─ router.node.ts
+│  │     │  ├─ portfolio/
+│  │     │  │  ├─ load-portfolio.node.ts
+│  │     │  │  ├─ calculate-portfolio-health.node.ts
+│  │     │  │  └─ generate-portfolio-advice.node.ts
+│  │     │  ├─ market-data/
+│  │     │  │  ├─ load-prices.node.ts
+│  │     │  │  ├─ load-financial-statements.node.ts
+│  │     │  │  ├─ calculate-ratios.node.ts
+│  │     │  │  └─ calculate-indicators.node.ts
+│  │     │  ├─ research/
+│  │     │  │  ├─ plan-research.node.ts
+│  │     │  │  ├─ run-parallel-research.node.ts
+│  │     │  │  ├─ summarize-sources.node.ts
+│  │     │  │  └─ synthesize-answer.node.ts
+│  │     │  ├─ billing/
+│  │     │  │  ├─ reserve-credit.node.ts
+│  │     │  │  ├─ finalize-usage.node.ts
+│  │     │  │  └─ pause-credit-insufficient.node.ts
+│  │     │  └─ human/
+│  │     │     ├─ request-approval.node.ts
+│  │     │     └─ wait-for-user-input.node.ts
+│  │     ├─ state/
+│  │     │  ├─ portfolio-review.state.ts
+│  │     │  ├─ company-analysis.state.ts
+│  │     │  ├─ deep-research.state.ts
+│  │     │  ├─ report-generation.state.ts
+│  │     │  └─ shared-agent.state.ts
+│  │     ├─ persistence/
+│  │     │  ├─ drizzle-checkpointer.ts
+│  │     │  ├─ agent-run.repository.ts
+│  │     │  ├─ agent-run-step.repository.ts
+│  │     │  └─ graph-snapshot.repository.ts
+│  │     ├─ subagents/
+│  │     │  ├─ portfolio-advisor.subagent.ts
+│  │     │  ├─ financial-statement.subagent.ts
+│  │     │  ├─ technical-analysis.subagent.ts
+│  │     │  ├─ research.subagent.ts
+│  │     │  ├─ risk-profile.subagent.ts
+│  │     │  └─ report-writer.subagent.ts
+│  │     └─ events/
+│  │        ├─ agent-run-started.event.ts
+│  │        ├─ agent-run-paused.event.ts
+│  │        ├─ agent-run-resumed.event.ts
+│  │        ├─ agent-run-completed.event.ts
+│  │        └─ agent-node-completed.event.ts
 │  │
 │  ├─ automation/
 │  │  ├─ src/
@@ -516,24 +585,24 @@ openbulls/
 │  │  └─ package.json
 │  │
 │  ├─ reports/
-│  │  ├─ src/
-│  │  │  ├─ index.ts
-│  │  │  ├─ domain/
-│  │  │  │  ├─ report-type.ts
-│  │  │  │  └─ report-format.ts
-│  │  │  ├─ application/
-│  │  │  │  ├─ generate-report.command.ts
-│  │  │  │  └─ export-report.command.ts
-│  │  │  └─ infrastructure/
-│  │  │     ├─ pdf/
-│  │  │     │  └─ pdf-report.generator.ts
-│  │  │     ├─ excel/
-│  │  │     │  └─ excel-report.generator.ts
-│  │  │     └─ markdown/
-│  │  │        └─ markdown-report.generator.ts
-│  │  └─ package.json
+│  │  ├─ package.json
 │  │  ├─ tsconfig.json
 │  │  ├─ tsup.config.ts
+│  │  └─ src/
+│  │     ├─ index.ts
+│  │     ├─ domain/
+│  │     │  ├─ report-type.ts
+│  │     │  └─ report-format.ts
+│  │     ├─ application/
+│  │     │  ├─ generate-report.command.ts
+│  │     │  └─ export-report.command.ts
+│  │     └─ infrastructure/
+│  │        ├─ pdf/
+│  │        │  └─ pdf-report.generator.ts
+│  │        ├─ excel/
+│  │        │  └─ excel-report.generator.ts
+│  │        └─ markdown/
+│  │           └─ markdown-report.generator.ts
 │  │
 │  ├─ jobs/
 │  │  ├─ src/
@@ -542,14 +611,6 @@ openbulls/
 │  │  │  │  ├─ queue-client.ts
 │  │  │  │  ├─ queue-names.ts
 │  │  │  │  └─ job-payloads.ts
-│  │  │  ├─ processors/
-│  │  │  │  ├─ ai-agent-run.processor.ts
-│  │  │  │  ├─ scheduled-job.processor.ts
-│  │  │  │  ├─ notification.processor.ts
-│  │  │  │  ├─ price-refresh.processor.ts
-│  │  │  │  ├─ candle-refresh.processor.ts
-│  │  │  │  ├─ financial-statement-import.processor.ts
-│  │  │  │  └─ indicator-calculation.processor.ts
 │  │  │  └─ adapters/
 │  │  │     ├─ bullmq.adapter.ts
 │  │  │     ├─ redis.adapter.ts
@@ -610,6 +671,9 @@ openbulls/
 │  ├─ structure.md
 │  ├─ billing.md
 │  ├─ ai-agents.md
+│  ├─ agent-runtime.md
+│  ├─ agent-worker.md
+│  ├─ langgraph.md
 │  ├─ market-data.md
 │  ├─ scheduled-jobs.md
 │  ├─ telegram-bot.md
