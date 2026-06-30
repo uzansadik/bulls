@@ -1,7 +1,5 @@
 # Openbulls Monorepo Structure
 
-Bu yapı; AI agent/workflow sistemi, kredi yönetimi, kullanıcı bazlı scheduled jobs, cron runner, Telegram bot, portföy yönetimi, billing, tool registry, memory ve resume edilebilir agent run mantığını kapsar.
-
 ```txt
 openbulls/
 ├─ apps/
@@ -116,6 +114,8 @@ openbulls/
 │  │  │  │  ├─ auth.schema.ts
 │  │  │  │  ├─ assets.schema.ts
 │  │  │  │  ├─ portfolio.schema.ts
+│  │  │  │  ├─ market-data.schema.ts
+│  │  │  │  ├─ financial-statements.schema.ts
 │  │  │  │  ├─ chat.schema.ts
 │  │  │  │  ├─ ai.schema.ts
 │  │  │  │  ├─ billing.schema.ts
@@ -125,6 +125,8 @@ openbulls/
 │  │  │  ├─ repositories/
 │  │  │  │  ├─ ai-chat.repository.ts
 │  │  │  │  ├─ portfolio.repository.ts
+│  │  │  │  ├─ market-data.repository.ts
+│  │  │  │  ├─ financial-statement.repository.ts
 │  │  │  │  ├─ billing.repository.ts
 │  │  │  │  ├─ automation.repository.ts
 │  │  │  │  └─ user-memory.repository.ts
@@ -200,6 +202,7 @@ openbulls/
 │  │  │  │  └─ services/
 │  │  │  │     ├─ portfolio-calculator.service.ts
 │  │  │  │     ├─ average-cost.service.ts
+│  │  │  │     ├─ portfolio-valuation.service.ts
 │  │  │  │     └─ portfolio-health.service.ts
 │  │  │  ├─ application/
 │  │  │  │  ├─ commands/
@@ -212,19 +215,104 @@ openbulls/
 │  │  │  │  │  └─ get-portfolio-history.query.ts
 │  │  │  │  └─ ports/
 │  │  │  │     ├─ portfolio.repository.port.ts
+│  │  │  │     ├─ market-data-service.port.ts
+│  │  │  │     └─ fx-rate-service.port.ts
+│  │  │  └─ infrastructure/
+│  │  │     └─ repositories/
+│  │  │        └─ drizzle-portfolio.repository.ts
+│  │  └─ package.json
+│  │
+│  ├─ market-data/
+│  │  ├─ src/
+│  │  │  ├─ index.ts
+│  │  │  ├─ domain/
+│  │  │  │  ├─ entities/
+│  │  │  │  │  ├─ market-asset.entity.ts
+│  │  │  │  │  ├─ price-candle.entity.ts
+│  │  │  │  │  ├─ asset-price.entity.ts
+│  │  │  │  │  ├─ fx-rate.entity.ts
+│  │  │  │  │  ├─ financial-statement.entity.ts
+│  │  │  │  │  ├─ financial-statement-line.entity.ts
+│  │  │  │  │  └─ market-news.entity.ts
+│  │  │  │  ├─ value-objects/
+│  │  │  │  │  ├─ market-symbol.ts
+│  │  │  │  │  ├─ market-code.ts
+│  │  │  │  │  ├─ exchange-code.ts
+│  │  │  │  │  ├─ candle-interval.ts
+│  │  │  │  │  ├─ statement-period.ts
+│  │  │  │  │  ├─ statement-type.ts
+│  │  │  │  │  ├─ indicator-type.ts
+│  │  │  │  │  └─ data-vendor.ts
+│  │  │  │  └─ services/
+│  │  │  │     ├─ price-normalizer.service.ts
+│  │  │  │     ├─ candle-aggregator.service.ts
+│  │  │  │     ├─ fx-conversion.service.ts
+│  │  │  │     ├─ financial-statement-normalizer.service.ts
+│  │  │  │     ├─ financial-ratio-calculator.service.ts
+│  │  │  │     ├─ technical-indicator-calculator.service.ts
+│  │  │  │     ├─ moving-average-calculator.service.ts
+│  │  │  │     ├─ rsi-calculator.service.ts
+│  │  │  │     ├─ macd-calculator.service.ts
+│  │  │  │     ├─ bollinger-band-calculator.service.ts
+│  │  │  │     ├─ valuation-metric-calculator.service.ts
+│  │  │  │     └─ market-data-quality.service.ts
+│  │  │  ├─ application/
+│  │  │  │  ├─ commands/
+│  │  │  │  │  ├─ refresh-asset-price.command.ts
+│  │  │  │  │  ├─ refresh-price-candles.command.ts
+│  │  │  │  │  ├─ refresh-fx-rates.command.ts
+│  │  │  │  │  ├─ import-financial-statement.command.ts
+│  │  │  │  │  ├─ calculate-financial-ratios.command.ts
+│  │  │  │  │  ├─ calculate-technical-indicators.command.ts
+│  │  │  │  │  └─ refresh-market-news.command.ts
+│  │  │  │  ├─ queries/
+│  │  │  │  │  ├─ get-latest-price.query.ts
+│  │  │  │  │  ├─ get-price-history.query.ts
+│  │  │  │  │  ├─ get-fx-rate.query.ts
+│  │  │  │  │  ├─ get-financial-statement.query.ts
+│  │  │  │  │  ├─ get-financial-ratios.query.ts
+│  │  │  │  │  ├─ get-technical-indicators.query.ts
+│  │  │  │  │  └─ search-market-news.query.ts
+│  │  │  │  └─ ports/
+│  │  │  │     ├─ market-data.repository.port.ts
 │  │  │  │     ├─ price-provider.port.ts
-│  │  │  │     └─ fx-rate-provider.port.ts
+│  │  │  │     ├─ candle-provider.port.ts
+│  │  │  │     ├─ fx-rate-provider.port.ts
+│  │  │  │     ├─ financial-statement-provider.port.ts
+│  │  │  │     ├─ market-news-provider.port.ts
+│  │  │  │     └─ market-calendar-provider.port.ts
 │  │  │  └─ infrastructure/
 │  │  │     ├─ repositories/
-│  │  │     │  └─ drizzle-portfolio.repository.ts
+│  │  │     │  ├─ drizzle-market-data.repository.ts
+│  │  │     │  └─ drizzle-financial-statement.repository.ts
 │  │  │     ├─ price-providers/
 │  │  │     │  ├─ composite-price.provider.ts
 │  │  │     │  ├─ twelve-data.provider.ts
 │  │  │     │  ├─ bist.provider.ts
+│  │  │     │  ├─ yahoo-finance.provider.ts
 │  │  │     │  └─ mock-price.provider.ts
-│  │  │     └─ fx-providers/
-│  │  │        ├─ tcmb.provider.ts
-│  │  │        └─ mock-fx.provider.ts
+│  │  │     ├─ candle-providers/
+│  │  │     │  ├─ twelve-data-candle.provider.ts
+│  │  │     │  ├─ yahoo-finance-candle.provider.ts
+│  │  │     │  └─ mock-candle.provider.ts
+│  │  │     ├─ fx-providers/
+│  │  │     │  ├─ tcmb.provider.ts
+│  │  │     │  ├─ exchangerate.provider.ts
+│  │  │     │  └─ mock-fx.provider.ts
+│  │  │     ├─ financial-statement-providers/
+│  │  │     │  ├─ kap-financial-statement.provider.ts
+│  │  │     │  ├─ sec-financial-statement.provider.ts
+│  │  │     │  └─ mock-financial-statement.provider.ts
+│  │  │     ├─ news-providers/
+│  │  │     │  ├─ kap-announcement.provider.ts
+│  │  │     │  ├─ market-news.provider.ts
+│  │  │     │  └─ mock-news.provider.ts
+│  │  │     └─ clients/
+│  │  │        ├─ kap-client.ts
+│  │  │        ├─ twelve-data-client.ts
+│  │  │        ├─ yahoo-finance-client.ts
+│  │  │        ├─ tcmb-client.ts
+│  │  │        └─ sec-client.ts
 │  │  └─ package.json
 │  │
 │  ├─ ai/
@@ -249,6 +337,7 @@ openbulls/
 │  │  │  │  │  └─ agent-step.ts
 │  │  │  │  ├─ portfolio-advisor.agent.ts
 │  │  │  │  ├─ financial-statement.agent.ts
+│  │  │  │  ├─ technical-analysis.agent.ts
 │  │  │  │  ├─ report-writer.agent.ts
 │  │  │  │  ├─ research.agent.ts
 │  │  │  │  ├─ risk-profile.agent.ts
@@ -256,6 +345,7 @@ openbulls/
 │  │  │  ├─ workflows/
 │  │  │  │  ├─ portfolio-review.workflow.ts
 │  │  │  │  ├─ company-analysis.workflow.ts
+│  │  │  │  ├─ technical-analysis.workflow.ts
 │  │  │  │  ├─ deep-research.workflow.ts
 │  │  │  │  ├─ transaction-capture.workflow.ts
 │  │  │  │  └─ report-generation.workflow.ts
@@ -269,15 +359,19 @@ openbulls/
 │  │  │  │  │  ├─ get-portfolio-overview.tool.ts
 │  │  │  │  │  ├─ get-positions.tool.ts
 │  │  │  │  │  └─ calculate-portfolio-health.tool.ts
-│  │  │  │  ├─ market/
+│  │  │  │  ├─ market-data/
 │  │  │  │  │  ├─ get-delayed-price.tool.ts
+│  │  │  │  │  ├─ get-price-history.tool.ts
 │  │  │  │  │  ├─ get-fx-rate.tool.ts
+│  │  │  │  │  ├─ get-technical-indicators.tool.ts
+│  │  │  │  │  ├─ get-financial-ratios.tool.ts
 │  │  │  │  │  └─ search-market-news.tool.ts
 │  │  │  │  ├─ financials/
 │  │  │  │  │  ├─ get-financial-statement.tool.ts
 │  │  │  │  │  ├─ get-income-statement.tool.ts
 │  │  │  │  │  ├─ get-balance-sheet.tool.ts
-│  │  │  │  │  └─ get-cash-flow.tool.ts
+│  │  │  │  │  ├─ get-cash-flow.tool.ts
+│  │  │  │  │  └─ analyze-financial-statement.tool.ts
 │  │  │  │  └─ automation/
 │  │  │  │     ├─ create-scheduled-job.tool.ts
 │  │  │  │     ├─ pause-scheduled-job.tool.ts
@@ -413,16 +507,12 @@ openbulls/
 │  │  │  │  ├─ telegram-bot-token.service.ts
 │  │  │  │  ├─ telegram-webhook.service.ts
 │  │  │  │  └─ telegram-message-normalizer.ts
-│  │  │  ├─ kap/
-│  │  │  │  ├─ kap-client.ts
-│  │  │  │  ├─ kap-financial-statement.provider.ts
-│  │  │  │  └─ kap-announcement.provider.ts
-│  │  │  ├─ market-data/
-│  │  │  │  ├─ market-data-client.ts
-│  │  │  │  └─ delayed-market-data.provider.ts
-│  │  │  └─ encryption/
-│  │  │     ├─ secret-vault.ts
-│  │  │     └─ encrypt-decrypt.ts
+│  │  │  ├─ encryption/
+│  │  │  │  ├─ secret-vault.ts
+│  │  │  │  └─ encrypt-decrypt.ts
+│  │  │  └─ webhooks/
+│  │  │     ├─ webhook-signature.service.ts
+│  │  │     └─ webhook-delivery.service.ts
 │  │  └─ package.json
 │  │
 │  ├─ reports/
@@ -442,6 +532,8 @@ openbulls/
 │  │  │     └─ markdown/
 │  │  │        └─ markdown-report.generator.ts
 │  │  └─ package.json
+│  │  ├─ tsconfig.json
+│  │  ├─ tsup.config.ts
 │  │
 │  ├─ jobs/
 │  │  ├─ src/
@@ -454,7 +546,10 @@ openbulls/
 │  │  │  │  ├─ ai-agent-run.processor.ts
 │  │  │  │  ├─ scheduled-job.processor.ts
 │  │  │  │  ├─ notification.processor.ts
-│  │  │  │  └─ price-refresh.processor.ts
+│  │  │  │  ├─ price-refresh.processor.ts
+│  │  │  │  ├─ candle-refresh.processor.ts
+│  │  │  │  ├─ financial-statement-import.processor.ts
+│  │  │  │  └─ indicator-calculation.processor.ts
 │  │  │  └─ adapters/
 │  │  │     ├─ bullmq.adapter.ts
 │  │  │     ├─ redis.adapter.ts
@@ -512,8 +607,10 @@ openbulls/
 │
 ├─ docs/
 │  ├─ architecture.md
+│  ├─ structure.md
 │  ├─ billing.md
 │  ├─ ai-agents.md
+│  ├─ market-data.md
 │  ├─ scheduled-jobs.md
 │  ├─ telegram-bot.md
 │  └─ deployment.md
@@ -527,312 +624,3 @@ openbulls/
 ├─ .env.example
 └─ README.md
 ```
-
-## Ana Mimari Kararlar
-
-### 1. Cron App Business Logic Bilmemeli
-
-`apps/cron` içinde şuna benzer dosyalar olmamalı:
-
-```txt
-daily-portfolio-review.job.ts
-```
-
-Çünkü bu yaklaşım cron uygulamasının iş mantığını bilmesine sebep olur.
-
-Doğru ayrım:
-
-```txt
-apps/cron = zamanı gelen işleri tetikleyen generic runner
-packages/automation = scheduled job domain/application/executor sistemi
-packages/ai = agent/workflow/tool çalıştırma
-packages/billing = kredi kontrolü
-packages/notifications = sonucu kullanıcıya ulaştırma
-packages/ui shadcn ve ai-elements primitive componentleri. (değişiklik yapılamaz / cli ile sadece ekleme yapılır. primitivi componentler değiştirilemez.)
-```
-
-Yani günlük portföy yorumu artık cron dosyası değil, DB kaydıdır.
-
-Örnek `user_scheduled_jobs` kaydı:
-
-```json
-{
-  "userId": "uuid",
-  "type": "portfolio.daily_review",
-  "status": "active",
-  "schedule": {
-    "frequency": "daily",
-    "time": "09:00"
-  },
-  "timezone": "Europe/Istanbul",
-  "config": {
-    "portfolioId": "uuid",
-    "deliveryChannel": "telegram",
-    "language": "tr",
-    "style": "simple"
-  },
-  "nextRunAt": "2026-07-01T06:00:00.000Z"
-}
-```
-
-### 2. apps/cron Çalışma Mantığı
-
-```txt
-apps/cron
-  ↓
-runDueUserScheduledJobs()
-  ↓
-packages/automation
-  ↓
-due jobs bulunur
-  ↓
-executor-registry uygun executor'ı seçer
-  ↓
-portfolio-daily-review.executor çalışır
-  ↓
-billing credit reserve eder
-  ↓
-ai workflow çalışır
-  ↓
-usage finalize edilir
-  ↓
-notifications sonucu gönderir
-  ↓
-nextRunAt güncellenir
-```
-
-### 3. Kredi Sistemi Merkezi Olmalı
-
-Kredi kontrolü sadece chat route içinde olmamalı. Merkezi paket:
-
-```txt
-packages/billing
-```
-
-Chat akışı:
-
-```txt
-user message
-  ↓
-billing.reserveCredit()
-  ↓
-ai-orchestrator çalışır
-  ↓
-usage çıkarılır
-  ↓
-billing.finalizeCreditUsage()
-```
-
-Scheduled job akışı:
-
-```txt
-scheduled job başladı
-  ↓
-billing.reserveCredit()
-  ↓
-executor çalışır
-  ↓
-ai workflow çalışır
-  ↓
-billing.finalizeCreditUsage()
-```
-
-Kredi yoksa:
-
-```txt
-job failed değil
-job skipped_credit_insufficient
-kullanıcıya notification gönderilebilir
-nextRunAt yeniden hesaplanır
-```
-
-### 4. Agent Resume Mantığı
-
-Kullanıcının kredisi 10 aşamalı agent’ın 5. aşamasında biterse, sistem durup sonra devam edebilmelidir.
-
-Bunun yeri:
-
-```txt
-packages/ai/src/orchestrator/resumable-agent-runner.ts
-packages/ai/src/orchestrator/agent-state-machine.ts
-```
-
-DB tarafında gerekli tablolar:
-
-```txt
-ai_agent_runs
-ai_agent_run_steps
-ai_tool_calls
-ai_usage_events
-```
-
-Örnek akış:
-
-```txt
-agent run başladı
-  ↓
-step 1 completed
-step 2 completed
-step 3 completed
-step 4 completed
-step 5 credit_insufficient
-  ↓
-run status = paused_credit_insufficient
-  ↓
-kullanıcı kredi yükledi
-  ↓
-resume run
-  ↓
-step 6'dan devam
-```
-
-### 5. Tool Sayısı Artınca Tool Selector Kullanılmalı
-
-Her mesajda 100 tool modele verilmemeli.
-
-Bunun için:
-
-```txt
-packages/ai/src/tools/registry/tool-selector.ts
-```
-
-Örnek:
-
-```txt
-Kullanıcı: 100 THYAO aldım
-  ↓
-tool-selector
-  ↓
-modele sadece ilgili tool'lar verilir:
-- add-transaction.tool
-- get-portfolio-overview.tool
-- get-delayed-price.tool
-```
-
-Başka örnek:
-
-```txt
-Kullanıcı: TUPRS bilanço yorumla
-  ↓
-tool-selector
-  ↓
-modele sadece ilgili tool'lar verilir:
-- get-financial-statement.tool
-- get-income-statement.tool
-- get-balance-sheet.tool
-- search-market-news.tool
-```
-
-### 6. apps/cron ve packages/jobs Ayrımı
-
-`apps/cron` zamanlayıcıdır.
-
-```txt
-apps/cron
-```
-
-`packages/jobs` queue altyapısıdır.
-
-```txt
-packages/jobs
-```
-
-Örnek akış:
-
-```txt
-apps/cron zamanı gelen işleri bulur
-  ↓
-packages/jobs kuyruğa scheduled-job ekler
-  ↓
-worker bu işi işler
-```
-
-Başlangıçta Redis/BullMQ şart değildir. Basit başlanabilir:
-
-```txt
-in-memory / direct execution
-```
-
-Sonra büyüyünce geçilebilir:
-
-```txt
-Redis + BullMQ
-```
-
-Bu yüzden structure’da şu adapter’lar var:
-
-```txt
-bullmq.adapter.ts
-redis.adapter.ts
-in-memory-queue.adapter.ts
-```
-
-## Minimum Başlangıç Paketi
-
-Hepsini aynı anda yazmaya gerek yok. İlk gerçekçi başlangıç:
-
-```txt
-apps/
-  web/
-  cron/
-
-packages/
-  db/
-  auth/
-  shared/
-  ui/
-  portfolio/
-  ai/
-  billing/
-  automation/
-  notifications/
-  config/
-```
-
-Sonradan eklenebilir:
-
-```txt
-packages/jobs
-packages/reports
-packages/integrations
-apps/telegram-bot
-```
-
-## Temel Mantık
-
-Openbulls şunları kapsar:
-
-```txt
-Openbulls
-├─ Chat tabanlı AI finans asistanı
-├─ Portfolio tracker
-├─ Kullanıcı bazlı kredi sistemi
-├─ Resume edilebilir agent workflow
-├─ Kullanıcı tarafından oluşturulan scheduled jobs
-├─ Telegram / web / mail bildirimleri
-├─ KAP / piyasa verisi / haber tool’ları
-└─ PDF / Excel rapor üretimi
-```
-
-En kritik ayrım:
-
-```txt
-Job Type = sistemin desteklediği iş türü
-Job Instance = kullanıcının oluşturduğu zamanlanmış iş
-```
-
-Örnek:
-
-```txt
-portfolio.daily_review
-```
-
-Bu sistemde desteklenen bir executor olabilir.
-
-Ama:
-
-```txt
-Sadık kullanıcısı için her sabah 09:00'da portföy yorumu gönder
-```
-
-Bu sadece DB’de duran kullanıcıya özel bir `user_scheduled_jobs` kaydı olmalıdır.
