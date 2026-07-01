@@ -104,10 +104,10 @@ export class InvalidRequestError extends MarketDataError {
 /** 404 or provider-specific "not found" — symbol doesn't exist. */
 export class SymbolNotFoundError extends MarketDataError {
   readonly code = "market-data/symbol-not-found" as const;
-  readonly data: { symbol: AssetSymbol; provider: ProviderName; message?: string };
-  constructor(data: { symbol: AssetSymbol; provider: ProviderName; message?: string }) {
+  readonly data: { symbol?: AssetSymbol; provider: ProviderName; message?: string };
+  constructor(data: { symbol?: AssetSymbol; provider: ProviderName; message?: string }) {
     super(
-      `symbol not found: ${data.symbol} via ${data.provider}${
+      `symbol not found${data.symbol ? `: ${data.symbol}` : ""} via ${data.provider}${
         data.message ? ` — ${data.message}` : ""
       }`,
     );
