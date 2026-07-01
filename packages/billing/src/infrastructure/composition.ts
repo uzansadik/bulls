@@ -96,7 +96,4 @@ export function createBillingServicesFromDb(
   return createBillingServices(deps);
 }
 
-export type {
-  BillingDeps,
-  BillingServices,
-} from "./billing.types";
+export type { BillingDeps, BillingServices } from "./billing.types";
