@@ -69,7 +69,16 @@ export function createRepositories(db: DB): Repositories {
 // Port interfaces (re-exported for domain packages to import without
 // pulling in adapter implementations).
 export type { IAgentRunRepository } from "./agent-run.port";
-export type { CreateAgentRunInput, UpdateAgentRunStatusInput } from "./agent-run.port";
+export type {
+  CreateAgentRunInput,
+  UpdateAgentRunStatusInput,
+  RecordStepInput,
+  MarkStepFinishedInput,
+  RecordToolCallInput,
+  MarkToolCallFinishedInput,
+  RecordAiUsageEventInput,
+  SaveGraphSnapshotInput,
+} from "./agent-run.port";
 export type { ICreditReservationRepository } from "./credit-reservation.port";
 export type {
   CreateReservationInput,
