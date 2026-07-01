@@ -1,0 +1,39 @@
+{
+  "name": "openbulls",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Openbulls - AI-powered finance, portfolio tracking, market-data, automation, and reporting platform.",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:generate": "pnpm --filter @openbulls/db generate",
+    "db:migrate": "pnpm --filter @openbulls/db migrate",
+    "db:studio": "pnpm --filter @openbulls/db studio",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "tsx scripts/reset-db.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

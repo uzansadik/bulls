@@ -1,0 +1,209 @@
+{
+  "common": {
+    "appName": "Openbulls",
+    "tagline": "AI-powered finance, portfolio and market data",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "learnMore": "Learn more"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "portfolio": "Portfolio",
+    "chat": "Chat",
+    "automations": "Automations",
+    "billing": "Billing",
+    "settings": "Settings",
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ"
+  },
+  "landing": {
+    "navbar": {
+      "signIn": "Sign In",
+      "signUp": "Get Started"
+    },
+    "hero": {
+      "title": "Manage Your Investments with AI",
+      "subtitle": "Openbulls accelerates your financial decisions with portfolio tracking, real-time market data, and LangGraph-powered AI agents.",
+      "ctaPrimary": "Get Started Free",
+      "ctaSecondary": "Explore Demo",
+      "trustBadge": "Trusted by 1,000+ investors",
+      "browserPreviewLabel": "Openbulls Dashboard Preview"
+    },
+    "trustBar": {
+      "title": "Reliable market data providers"
+    },
+    "features": {
+      "title": "Everything in one platform",
+      "subtitle": "Professional investment tools, AI-powered analysis and enterprise-grade security.",
+      "aiAgent": {
+        "title": "AI Agent Analysis",
+        "description": "Multi-agent system analyzes companies in parallel: financial statements, technical indicators, news flow."
+      },
+      "portfolio": {
+        "title": "Portfolio Tracking",
+        "description": "Real-time P&L, holdings and transaction history at a glance."
+      },
+      "marketData": {
+        "title": "Market Data",
+        "description": "KAP, Yahoo Finance, Twelve Data, TCMB and more in one place."
+      },
+      "alerts": {
+        "title": "Smart Alerts",
+        "description": "Price alerts, news flow and earnings calendar push notifications."
+      },
+      "multiLang": {
+        "title": "Multi-language",
+        "description": "Full UI support in Turkish and English."
+      },
+      "security": {
+        "title": "Enterprise Security",
+        "description": "Row-level security, audit log, SOC2-ready infrastructure."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Professional portfolio management in three steps.",
+      "step1": {
+        "title": "Connect",
+        "description": "Create your account, add portfolio symbols."
+      },
+      "step2": {
+        "title": "Analyze",
+        "description": "AI agents run continuously, produce actionable insights."
+      },
+      "step3": {
+        "title": "Decide",
+        "description": "Get recommendations from the dashboard, execute, manage your credits."
+      }
+    },
+    "agent": {
+      "title": "LangGraph Multi-Agent Architecture",
+      "subtitle": "Every analysis is produced by multiple expert agents working in parallel.",
+      "userMessage": "How is my portfolio doing this week?",
+      "aiMessage": "Your portfolio rose 3.2% this week. My AI agent flagged: tech sector strong, THYAO record-high volume..."
+    },
+    "pricing": {
+      "title": "The right plan for you",
+      "subtitle": "Start free, upgrade as you grow.",
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "period": "/mo",
+        "cta": "Get Started",
+        "features": ["100 credits/mo", "1 portfolio", "Basic analysis"]
+      },
+      "pro": {
+        "name": "Pro",
+        "badge": "Most Popular",
+        "price": "$29",
+        "period": "/mo",
+        "cta": "Go Pro",
+        "features": ["5,000 credits/mo", "Unlimited portfolios", "AI agent", "Webhook integration"]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Contact",
+        "period": "",
+        "cta": "Talk to Sales",
+        "features": ["Unlimited credits", "Custom SLA", "On-prem", "Audit log"]
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Which market data providers does Openbulls support?",
+      "a1": "KAP, TCMB, Yahoo Finance, Twelve Data and SEC integrations are live. Bloomberg and Reuters integrations are coming.",
+      "q2": "How do the AI agents work?",
+      "a2": "A multi-agent system running on LangGraph: financial statements, technical indicators and news flow are analyzed by separate agents, then results are synthesized.",
+      "q3": "How does the credit system work?",
+      "a3": "Each AI query consumes credits based on token usage. Credits reset monthly, and you can see your live balance from the dashboard.",
+      "q4": "Is my data secure?",
+      "a4": "All data is protected by row-level security (RLS) in Postgres. Better Auth sessions are carried via encrypted cookies. We are building on SOC2-compliant infrastructure.",
+      "q5": "What does the Free plan include?",
+      "a5": "The Free plan includes 100 credits per month, 1 portfolio and basic AI analysis. You can upgrade to Pro when you hit your limit.",
+      "q6": "Can I cancel anytime?",
+      "a6": "Yes — cancel from the dashboard at any time. Your access continues until the end of the current billing period."
+    },
+    "cta": {
+      "title": "Create your free account now",
+      "subtitle": "No credit card required. Start in 2 minutes.",
+      "button": "Create Free Account"
+    },
+    "footer": {
+      "product": "Product",
+      "productLink1": "Features",
+      "productLink2": "Pricing",
+      "productLink3": "FAQ",
+      "company": "Company",
+      "companyLink1": "About",
+      "companyLink2": "Blog",
+      "companyLink3": "Careers",
+      "legal": "Legal",
+      "legalLink1": "Privacy",
+      "legalLink2": "Terms",
+      "legalLink3": "GDPR",
+      "contact": "Contact",
+      "contactLink1": "Support",
+      "contactLink2": "Contact",
+      "copyright": "© 2026 Openbulls. All rights reserved."
+    }
+  },
+  "auth": {
+    "signInTitle": "Sign in to your account",
+    "signInSubtitle": "Enter your email and password to continue",
+    "signUpTitle": "Create a new account",
+    "signUpSubtitle": "Get started in seconds",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "nameLabel": "Full Name",
+    "passwordHint": "Must be at least 8 characters, with an uppercase letter and a digit",
+    "confirmPasswordLabel": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "submitSignIn": "Sign In",
+    "submitSignUp": "Create Account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createAccount": "Create a free account",
+    "signInLink": "Sign in",
+    "socialDivider": "or",
+    "socialGithub": "Continue with GitHub",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailInUse": "This email is already registered",
+      "weakPassword": "Password is too weak",
+      "invalidEmail": "Invalid email address",
+      "required": "This field is required",
+      "minPassword": "Password must be at least 8 characters",
+      "maxName": "Name must be at most 50 characters",
+      "minName": "Name must be at least 2 characters",
+      "passwordMismatch": "Passwords do not match",
+      "uppercaseRequired": "At least one uppercase letter is required",
+      "numberRequired": "At least one digit is required",
+      "unknown": "An unexpected error occurred. Please try again."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "portfolioValue": "Portfolio Value",
+    "todayChange": "Today's Change",
+    "totalGain": "Total Gain",
+    "creditBalance": "Credit Balance",
+    "signOut": "Sign Out"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundDescription": "The page you are looking for is not here.",
+    "goHome": "Go home",
+    "unauthorized": "You must sign in to view this page",
+    "serverError": "Server error. Please try again."
+  }
+}

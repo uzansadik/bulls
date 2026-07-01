@@ -1,0 +1,209 @@
+{
+  "common": {
+    "appName": "Openbulls",
+    "tagline": "AI destekli finans, portföy ve piyasa verileri",
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu",
+    "retry": "Tekrar dene",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "back": "Geri",
+    "next": "İleri",
+    "yes": "Evet",
+    "no": "Hayır",
+    "learnMore": "Daha fazla bilgi"
+  },
+  "nav": {
+    "dashboard": "Gösterge Paneli",
+    "portfolio": "Portföy",
+    "chat": "Sohbet",
+    "automations": "Otomasyonlar",
+    "billing": "Faturalandırma",
+    "settings": "Ayarlar",
+    "features": "Özellikler",
+    "pricing": "Fiyatlandırma",
+    "faq": "SSS"
+  },
+  "landing": {
+    "navbar": {
+      "signIn": "Giriş Yap",
+      "signUp": "Ücretsiz Başla"
+    },
+    "hero": {
+      "title": "Yatırımlarınızı AI ile yönetin",
+      "subtitle": "Openbulls, portföy takibi, gerçek zamanlı piyasa verisi ve LangGraph tabanlı AI agent'larıyla finansal kararlarınızı hızlandırır.",
+      "ctaPrimary": "Ücretsiz Başla",
+      "ctaSecondary": "Demo İncele",
+      "trustBadge": "1.000+ yatırımcı tarafından kullanılıyor",
+      "browserPreviewLabel": "Openbulls Dashboard Önizleme"
+    },
+    "trustBar": {
+      "title": "Güvenilir piyasa verisi sağlayıcıları"
+    },
+    "features": {
+      "title": "Tek platformda her şey",
+      "subtitle": "Profesyonel yatırım araçları, AI destekli analiz ve kurumsal düzeyde güvenlik.",
+      "aiAgent": {
+        "title": "AI Agent Analizi",
+        "description": "Multi-agent sistemi şirketinizi paralel olarak analiz eder: finansal tablolar, teknik indikatörler, haber akışı."
+      },
+      "portfolio": {
+        "title": "Portföy Takibi",
+        "description": "Gerçek zamanlı P&L, holding'ler ve işlem geçmişi tek bakışta."
+      },
+      "marketData": {
+        "title": "Piyasa Verileri",
+        "description": "KAP, Yahoo Finance, Twelve Data, TCMB ve daha fazlası tek yerde."
+      },
+      "alerts": {
+        "title": "Akıllı Alarmlar",
+        "description": "Fiyat uyarıları, haber akışı ve kazanç takvimi push bildirimleri."
+      },
+      "multiLang": {
+        "title": "Çoklu Dil",
+        "description": "Türkçe ve İngilizce tam arayüz desteği."
+      },
+      "security": {
+        "title": "Kurumsal Güvenlik",
+        "description": "Satır düzeyinde güvenlik, denetim günlüğü, SOC2 uyumlu altyapı."
+      }
+    },
+    "howItWorks": {
+      "title": "Nasıl Çalışır?",
+      "subtitle": "Üç adımda profesyonel portföy yönetimi.",
+      "step1": {
+        "title": "Bağlan",
+        "description": "Hesabını oluştur, portföy sembollerini ekle."
+      },
+      "step2": {
+        "title": "Analiz Et",
+        "description": "AI agent'ları sürekli çalışır, uygulanabilir öneriler üretir."
+      },
+      "step3": {
+        "title": "Karar Ver",
+        "description": "Dashboard'dan öneriler al, işlemleri yürüt, kredilerini yönet."
+      }
+    },
+    "agent": {
+      "title": "LangGraph Multi-Agent Mimarisi",
+      "subtitle": "Her analiz birden fazla uzman agent'ın paralel çalışmasıyla üretilir.",
+      "userMessage": "Bu hafta portföyüm nasıl?",
+      "aiMessage": "Portföyünüz bu hafta %3,2 yükseldi. AI agent'ım şunları tespit etti: teknoloji sektörü güçlü, THYAO rekor hacimle öne çıktı..."
+    },
+    "pricing": {
+      "title": "Size uygun plan",
+      "subtitle": "Ücretsiz başlayın, büyüdükçe yükseltin.",
+      "free": {
+        "name": "Free",
+        "price": "₺0",
+        "period": "/ay",
+        "cta": "Ücretsiz Başla",
+        "features": ["100 kredi/ay", "1 portföy", "Temel analiz"]
+      },
+      "pro": {
+        "name": "Pro",
+        "badge": "En Popüler",
+        "price": "₺299",
+        "period": "/ay",
+        "cta": "Pro'ya Geç",
+        "features": ["5.000 kredi/ay", "Sınırsız portföy", "AI agent", "Webhook entegrasyonu"]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "İletişim",
+        "period": "",
+        "cta": "İletişime Geç",
+        "features": ["Sınırsız kredi", "Özel SLA", "On-prem kurulum", "Denetim günlüğü"]
+      }
+    },
+    "faq": {
+      "title": "Sıkça Sorulan Sorular",
+      "q1": "Openbulls hangi piyasa verisi sağlayıcılarını destekliyor?",
+      "a1": "Şu anda KAP, TCMB, Yahoo Finance, Twelve Data ve SEC entegrasyonlarımız aktif. Bloomberg ve Reuters entegrasyonları yolda.",
+      "q2": "AI agent'ları nasıl çalışır?",
+      "a2": "LangGraph üzerinde paralel çalışan multi-agent sistemi: finansal tablolar, teknik indikatörler ve haber akışı ayrı agent'lar tarafından analiz edilir, sonuçlar sentezlenir.",
+      "q3": "Kredi sistemi nasıl işliyor?",
+      "a3": "Her AI sorgusu kullanılan token miktarına göre kredi harcar. Krediler aylık yenilenir, dashboard'dan anlık bakiye görebilirsiniz.",
+      "q4": "Verilerim güvende mi?",
+      "a4": "Tüm veriler Postgres'de satır düzeyinde güvenlik (RLS) ile korunur. Better Auth oturumları şifrelenmiş çerezlerle taşınır. SOC2 uyumlu altyapı üzerinde çalışıyoruz.",
+      "q5": "Ücretsiz plan neler içerir?",
+      "a5": "Ücretsiz planda aylık 100 kredi, 1 portföy ve temel AI analizi vardır. Kredi limitiniz dolduğunda Pro'ya yükseltebilirsiniz.",
+      "q6": "İstediğim zaman iptal edebilir miyim?",
+      "a6": "Evet, istediğiniz zaman dashboard'dan aboneliğinizi iptal edebilirsiniz. Mevcut dönem sonuna kadar erişiminiz devam eder."
+    },
+    "cta": {
+      "title": "Hemen ücretsiz hesap oluşturun",
+      "subtitle": "Kredi kartı gerekmez. 2 dakikada başlayın.",
+      "button": "Ücretsiz Hesap Oluştur"
+    },
+    "footer": {
+      "product": "Ürün",
+      "productLink1": "Özellikler",
+      "productLink2": "Fiyatlandırma",
+      "productLink3": "SSS",
+      "company": "Şirket",
+      "companyLink1": "Hakkımızda",
+      "companyLink2": "Blog",
+      "companyLink3": "Kariyer",
+      "legal": "Yasal",
+      "legalLink1": "Gizlilik",
+      "legalLink2": "Kullanım Koşulları",
+      "legalLink3": "KVKK",
+      "contact": "İletişim",
+      "contactLink1": "Destek",
+      "contactLink2": "İletişim",
+      "copyright": "© 2026 Openbulls. Tüm hakları saklıdır."
+    }
+  },
+  "auth": {
+    "signInTitle": "Hesabınıza giriş yapın",
+    "signInSubtitle": "Devam etmek için e-posta ve parolanızı girin",
+    "signUpTitle": "Yeni hesap oluşturun",
+    "signUpSubtitle": "Saniyeler içinde başlayın",
+    "emailLabel": "E-posta",
+    "passwordLabel": "Parola",
+    "nameLabel": "Ad Soyad",
+    "passwordHint": "En az 8 karakter, büyük harf ve rakam içermelidir",
+    "confirmPasswordLabel": "Parolayı Onayla",
+    "forgotPassword": "Parolamı unuttum",
+    "submitSignIn": "Giriş Yap",
+    "submitSignUp": "Hesap Oluştur",
+    "noAccount": "Hesabınız yok mu?",
+    "haveAccount": "Zaten hesabınız var mı?",
+    "createAccount": "Ücretsiz hesap oluşturun",
+    "signInLink": "Giriş yapın",
+    "socialDivider": "veya",
+    "socialGithub": "GitHub ile devam et",
+    "errors": {
+      "invalidCredentials": "E-posta veya parola hatalı",
+      "emailInUse": "Bu e-posta zaten kullanılıyor",
+      "weakPassword": "Parola çok zayıf",
+      "invalidEmail": "Geçersiz e-posta adresi",
+      "required": "Bu alan zorunludur",
+      "minPassword": "Parola en az 8 karakter olmalı",
+      "maxName": "İsim en fazla 50 karakter olabilir",
+      "minName": "İsim en az 2 karakter olmalı",
+      "passwordMismatch": "Parolalar eşleşmiyor",
+      "uppercaseRequired": "En az bir büyük harf gerekli",
+      "numberRequired": "En az bir rakam gerekli",
+      "unknown": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+    }
+  },
+  "dashboard": {
+    "welcome": "Tekrar hoş geldin",
+    "portfolioValue": "Portföy Değeri",
+    "todayChange": "Bugünkü Değişim",
+    "totalGain": "Toplam Kazanç",
+    "creditBalance": "Kredi Bakiyesi",
+    "signOut": "Çıkış"
+  },
+  "errors": {
+    "notFound": "Sayfa bulunamadı",
+    "notFoundDescription": "Aradığın sayfa burada yok.",
+    "goHome": "Ana sayfaya dön",
+    "unauthorized": "Bu sayfayı görüntülemek için giriş yapmalısın",
+    "serverError": "Sunucu hatası. Lütfen tekrar dene."
+  }
+}

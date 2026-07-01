@@ -1,0 +1,79 @@
+/*
+ * Landing-page custom animations.
+ *
+ * Tailwind v4 doesn't ship `animate-blob` / `animation-delay-*` out
+ * of the box. We define them here so the marketing components can
+ * reference them by class name without modifying the `packages/ui`
+ * stylesheet (which is frozen).
+ *
+ * Imported from `app/layout.tsx` — Tailwind v4's `@source` directive
+ * in `packages/ui/src/styles/globals.css` already covers `apps/**`,
+ * so utility classes generated from here are picked up automatically.
+ */
+
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 9s infinite ease-in-out;
+  }
+  .animate-scan {
+    animation: scan 2.4s linear infinite;
+  }
+  .animate-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  }
+  .animate-reveal[data-revealed="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}

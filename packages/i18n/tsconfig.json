@@ -1,0 +1,5 @@
+{
+  "extends": "../../tooling/typescript/nextjs.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "messages"]
+}

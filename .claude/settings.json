@@ -16,7 +16,18 @@
       "Bash(ls)",
       "Bash(cat)",
       "Bash(find)",
-      "Bash(grep)"
+      "Bash(grep)",
+      "Bash(pnpm tsx *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm --filter @openbulls/billing exec tsx -e \"import { calculateUsageCost, credits } from '@openbulls/billing'; console.log\\(JSON.stringify\\(calculateUsageCost\\({ modelPricing: { inputCostPer1k: '0.003', outputCostPer1k: '0.015', markupPercent: '20' }, inputTokens: 1000, outputTokens: 500 }\\)\\)\\); console.log\\(credits.add\\('1.5', '2.3'\\), credits.sub\\('5', '0.5'\\)\\)\")",
+      "Bash(pnpm generate *)",
+      "Bash(mkdir -p apps/web/app/\\\\[locale\\\\]/\\\\\\(dashboard\\\\\\)/_data)",
+      "Bash(cp apps/web/app/data.json apps/web/app/\\\\[locale\\\\]/\\\\\\(dashboard\\\\\\)/_data/data.json)",
+      "Bash(pnpm --filter @openbulls/auth typecheck)",
+      "Bash(powershell -Command \"Stop-Process -Name 'next*' -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue; ls .next 2>&1\")",
+      "Bash(xargs grep -l \"hasLocale\\\\|isValidLocale\")",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm --filter @openbulls/web lint)"
     ],
     "deny": [
       "Bash(rm -rf /)",
