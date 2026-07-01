@@ -1,7 +1,6 @@
 /**
- * @openbulls/agent-runtime — package skeleton.
+ * @openbulls/agent-runtime
  *
- * Will be populated with domain/application/infrastructure layers
- * (see CLAUDE.md). For now this file is the public entry point.
+ * Placeholder. Implementation arrives in a later phase.
  */
 export {};

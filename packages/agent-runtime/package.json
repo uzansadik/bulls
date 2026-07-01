@@ -3,25 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "files": ["dist", "src"],
   "scripts": {
-    "build": "echo 'agent-runtime is consumed via source'",
-    "dev": "echo 'agent-runtime is consumed via source'",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src",
-    "clean": "rm -rf .turbo"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@openbulls/config": "workspace:*",
-    "@openbulls/db": "workspace:*"
+    "@openbulls/shared": "workspace:*",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
