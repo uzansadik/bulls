@@ -13,6 +13,7 @@
  *   - `TransactionNotFoundError`   — transactionId doesn't exist
  *   - `HoldingNotFoundError`       — (portfolio, asset) has no holding
  *   - `InvalidTransactionError`    — e.g. sell quantity > holding qty
+ *   - `InvalidInputError`          — malformed input (name, side, ...)
  *   - `DuplicateTransactionError`  — insert collides on unique key
  *   - `CurrencyMismatchError`      — txn/holding currency inconsistent
  *   - `ArchivedPortfolioError`     — mutating an archived portfolio
@@ -106,6 +107,16 @@ export class InvalidTransactionError extends PortfolioError {
   public constructor(input: { side: TransactionSide; reason: string }) {
     super(`Invalid ${input.side} transaction: ${input.reason}`);
     this.data = { side: input.side, reason: input.reason };
+  }
+}
+
+export class InvalidInputError extends PortfolioError {
+  public readonly code = "portfolio/invalid-input";
+  public readonly kind = "user" as const;
+  public readonly data: { readonly field: string; readonly reason: string; readonly provider?: never };
+  public constructor(input: { field: string; reason: string }) {
+    super(`Invalid ${input.field}: ${input.reason}`);
+    this.data = { field: input.field, reason: input.reason };
   }
 }
 

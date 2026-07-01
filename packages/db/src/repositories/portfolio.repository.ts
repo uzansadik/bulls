@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte } from "drizzle-orm";
 
 import { type DB, withTransaction } from "../client";
 import { portfolioHoldings, portfolioTransactions, portfolios } from "../schema/portfolio.schema";
@@ -7,6 +7,7 @@ import type {
   CreatePortfolioInput,
   IPortfolioRepository,
 } from "./portfolio.port";
+import type { PortfolioTransaction } from "../schema/portfolio.schema";
 
 export class DrizzlePortfolioRepository implements IPortfolioRepository {
   constructor(private readonly db: DB) {}
@@ -35,6 +36,13 @@ export class DrizzlePortfolioRepository implements IPortfolioRepository {
     return this.db.query.portfolios
       .findFirst({ where: eq(portfolios.id, id) })
       .then((r) => r ?? null);
+  }
+
+  async archive(id: string) {
+    await this.db
+      .update(portfolios)
+      .set({ isArchived: true, updatedAt: new Date() })
+      .where(eq(portfolios.id, id));
   }
 
   async recordTransaction(input: AddTransactionInput) {
@@ -93,5 +101,34 @@ export class DrizzlePortfolioRepository implements IPortfolioRepository {
     return this.db.query.portfolioHoldings.findMany({
       where: eq(portfolioHoldings.portfolioId, portfolioId),
     });
+  }
+
+  listTransactions(input: {
+    portfolioId: string;
+    from?: Date;
+    to?: Date;
+    side?: PortfolioTransaction["side"];
+    limit?: number;
+  }) {
+    const conds = [eq(portfolioTransactions.portfolioId, input.portfolioId)];
+    if (input.from) {
+      conds.push(gte(portfolioTransactions.executedAt, input.from));
+    }
+    if (input.to) {
+      conds.push(lte(portfolioTransactions.executedAt, input.to));
+    }
+    if (input.side) {
+      conds.push(eq(portfolioTransactions.side, input.side));
+    }
+    const qb = this.db.query.portfolioTransactions.findMany({
+      where: and(...conds),
+      orderBy: desc(portfolioTransactions.executedAt),
+      ...(input.limit !== undefined ? { limit: input.limit } : {}),
+    });
+    return qb;
+  }
+
+  async deleteTransaction(id: string) {
+    await this.db.delete(portfolioTransactions).where(eq(portfolioTransactions.id, id));
   }
 }
