@@ -16,11 +16,13 @@
  * each sell, plus `unitPrice × quantity − fees` for each dividend
  * payment.
  *
- * `currency` is the holding's local trade currency; FX-adjusted
- * views live in `Position` (computed on read).
+ * Note: `currency` is *not* persisted on the holding row
+ * (DB schema has no column). It is inferred from the holding's
+ * first transaction at query time by the application layer;
+ * FX-adjusted views live in `Position` (computed on read).
  */
 import type { AssetSymbol } from "./symbol";
-import type { Money, Currency } from "./brands";
+import type { Money } from "./brands";
 
 export interface Holding {
   readonly portfolioId: string;
@@ -28,6 +30,5 @@ export interface Holding {
   readonly quantity: Money;
   readonly avgCost: Money;
   readonly realizedPnl: Money;
-  readonly currency: Currency;
   readonly lastComputedAt: Date;
 }

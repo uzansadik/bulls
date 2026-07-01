@@ -12,6 +12,8 @@ export type {
   IPortfolioRepository,
   CreatePortfolioInput,
   AddTransactionInput,
+  ListTransactionsQuery,
+  UpsertHoldingInput,
 } from "@openbulls/db";
 export type {
   Portfolio,

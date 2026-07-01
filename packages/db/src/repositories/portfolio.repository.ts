@@ -90,6 +90,55 @@ export class DrizzlePortfolioRepository implements IPortfolioRepository {
     });
   }
 
+  async insertTransaction(input: AddTransactionInput) {
+    const txRows = await this.db
+      .insert(portfolioTransactions)
+      .values({
+        portfolioId: input.portfolioId,
+        assetSymbol: input.assetSymbol,
+        side: input.side,
+        quantity: input.quantity,
+        unitPrice: input.unitPrice,
+        fees: input.fees ?? "0",
+        currency: input.currency,
+        executedAt: input.executedAt,
+        notes: input.notes ?? null,
+      })
+      .returning();
+    const txRow = txRows[0];
+    if (!txRow) {
+      throw new Error("failed to insert portfolio_transactions row");
+    }
+    return txRow;
+  }
+
+  async upsertHolding(input: {
+    portfolioId: string;
+    assetSymbol: string;
+    quantity: string;
+    avgCost: string;
+    realizedPnl: string;
+  }) {
+    await this.db
+      .insert(portfolioHoldings)
+      .values({
+        portfolioId: input.portfolioId,
+        assetSymbol: input.assetSymbol,
+        quantity: input.quantity,
+        avgCost: input.avgCost,
+        realizedPnl: input.realizedPnl,
+      })
+      .onConflictDoUpdate({
+        target: [portfolioHoldings.portfolioId, portfolioHoldings.assetSymbol],
+        set: {
+          quantity: input.quantity,
+          avgCost: input.avgCost,
+          realizedPnl: input.realizedPnl,
+          lastComputedAt: new Date(),
+        },
+      });
+  }
+
   async recomputeHoldings(portfolioId: string) {
     // Recompute delegates to the portfolio package; this method is a
     // placeholder kept as a port contract. Implementation will call a
