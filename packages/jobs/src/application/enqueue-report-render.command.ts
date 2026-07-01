@@ -53,7 +53,7 @@ export async function enqueueReportRender(
   }
   if (!ALLOWED_FORMATS.has(input.format)) {
     return err(
-      new PayloadInvalidError(`format must be one of pdf|excel|markdown`, {
+      new PayloadInvalidError("format must be one of pdf|excel|markdown", {
         jobKind: "report-render",
         field: "format",
         issue: `got=${input.format}`,

@@ -17,8 +17,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { type Result, err, ok } from "@openbulls/shared";
-import type { Queue } from "bullmq";
-import { Queue as BullMqQueue } from "bullmq";
+import { Queue as BullMqQueue, type Queue } from "bullmq";
 import type { ConnectionOptions } from "bullmq";
 
 import { JobId } from "../domain/brands";
