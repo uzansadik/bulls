@@ -112,6 +112,7 @@ export class TcmbAdapter implements MarketDataAdapter {
       url,
       method: "GET",
       headers: { Accept: "application/xml,text/xml" },
+      responseType: "text",
     });
     if (!res.ok) return res;
 
