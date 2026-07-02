@@ -12,10 +12,14 @@ const withNextIntl = createNextIntlPlugin(
 
 const config: NextConfig = {
 	transpilePackages: [
+		"@openbulls/ai",
 		"@openbulls/auth",
 		"@openbulls/config",
 		"@openbulls/db",
 		"@openbulls/i18n",
+		"@openbulls/logger",
+		"@openbulls/market-data",
+		"@openbulls/portfolio",
 		"@openbulls/shared",
 		"@openbulls/ui",
 	],

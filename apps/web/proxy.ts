@@ -1,13 +1,13 @@
-import { type NextRequest, NextResponse } from "next/server";
 import createNextIntlMiddleware from "next-intl/middleware";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { defaultLocale, localePrefix, locales } from "@openbulls/i18n/config";
 
 const intlMiddleware = createNextIntlMiddleware({
-	locales: [...locales],
-	defaultLocale,
-	localePrefix,
-	localeDetection: true,
+  locales: [...locales],
+  defaultLocale,
+  localePrefix,
+  localeDetection: true,
 });
 
 const PUBLIC_PATHS = new Set<string>(["/", "/sign-in", "/sign-up"]);
