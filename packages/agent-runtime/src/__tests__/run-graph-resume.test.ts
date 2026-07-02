@@ -7,7 +7,12 @@ import { createAgentRuntimeServices } from "../infrastructure/composition";
 import { InMemoryAgentRunRepository } from "./in-memory-agent-run-repo.mock";
 import { InMemoryCheckpointer } from "./in-memory-checkpointer.mock";
 
-const noopLogger = { info: () => undefined, warn: () => undefined, error: () => undefined };
+const noopLogger = {
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: () => undefined,
+};
 
 // 3-step graph that we can break on the second node to simulate resume.
 const resumableGraph = (key: string): GraphDefinition<AgentRunState> => ({

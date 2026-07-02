@@ -34,7 +34,10 @@ export class InMemoryAgentRunRepository implements IAgentRunRepository {
 
   async create(input: CreateAgentRunInput): Promise<AiAgentRun> {
     this.calls.push({ method: "create", args: input });
-    const id = newId();
+    // Honour the caller's id when supplied so the mock mirrors the
+    // production Drizzle repository (which keys `ai_agent_runs.id`
+    // on the BullMQ job id for resume).
+    const id = input.id ?? newId();
     const row = {
       id,
       userId: input.userId,

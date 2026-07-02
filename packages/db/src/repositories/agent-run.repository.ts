@@ -42,6 +42,7 @@ export class DrizzleAgentRunRepository implements IAgentRunRepository {
     const rows = await this.db
       .insert(aiAgentRuns)
       .values({
+        ...(input.id !== undefined ? { id: input.id } : {}),
         userId: input.userId,
         graphKey: input.graphKey,
         threadId: input.threadId,

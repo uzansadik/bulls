@@ -5,6 +5,7 @@ import { InMemoryAgentRunRepository } from "./in-memory-agent-run-repo.mock";
 import { InMemoryCheckpointer } from "./in-memory-checkpointer.mock";
 
 const noopLogger = {
+  debug: () => undefined,
   info: () => undefined,
   warn: () => undefined,
   error: () => undefined,

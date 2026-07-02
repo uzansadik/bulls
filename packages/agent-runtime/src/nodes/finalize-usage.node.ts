@@ -13,6 +13,12 @@ import type { AgentRunState } from "../domain/state";
 
 export const finalizeUsageNode: NodeDefinition<AgentRunState> = {
   name: "finalize-usage",
+  /**
+   * Idempotent: a previous finalize set `state.budget.finalCost` and
+   * cleared the reservationId — a second invocation becomes a no-op
+   * so resume safety is preserved.
+   */
+  idempotent: true,
   async run(state, deps: NodeDeps) {
     const billing = deps.billing;
     if (!billing) {
@@ -20,7 +26,12 @@ export const finalizeUsageNode: NodeDefinition<AgentRunState> = {
     }
     const reservationId = state.budget?.reservationId;
     if (!reservationId) {
-      throw new NodeExecutionFailedError("finalize-usage", "no reservationId on state.budget");
+      // Already finalized (or no run reservation exists). Skip silently.
+      deps.logger.info("finalize-usage skipped — no active reservation", {
+        runId: state.runId,
+        existingFinalCost: state.budget?.finalCost ?? null,
+      });
+      return {};
     }
     const finalCost = state.usage?.costUsd ?? state.budget?.estimatedCost ?? "0";
     const result = await billing.finalizeUsage({

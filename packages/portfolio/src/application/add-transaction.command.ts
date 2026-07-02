@@ -23,6 +23,7 @@
  *   - `InvalidTransactionError` — sell qty > held qty (from pure recompute)
  */
 import { type Result, err, ok } from "@openbulls/shared";
+import type { PortfolioTransaction } from "@openbulls/db/schema";
 import { Currency, Money, PortfolioId, TransactionSide } from "../domain/brands";
 import {
   ArchivedPortfolioError,
@@ -127,7 +128,7 @@ export async function addTransaction(
   const txList = await deps.portfolios.listTransactions({
     portfolioId: input.portfolioId,
   });
-  const txVO: readonly Transaction[] = txList.map((r) => ({
+  const txVO: readonly Transaction[] = txList.map((r: PortfolioTransaction) => ({
     id: r.id,
     portfolioId: r.portfolioId,
     assetSymbol: AssetSymbol(r.assetSymbol),

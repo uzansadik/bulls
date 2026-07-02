@@ -10,6 +10,14 @@ import type { AgentRunStatus, StepStatus, ToolCallStatus } from "../schema/enums
 // ─── Agent Runs ──────────────────────────────────────────────────────────────
 
 export interface CreateAgentRunInput {
+  /**
+   * Optional explicit id. When provided, the row is inserted with
+   * that id — the runtime uses this to align `ai_agent_runs.id`
+   * with the BullMQ job id / snapshot.runId so that resume can
+   * find the row by id. When omitted, the DB default generates a
+   * fresh id (useful for tests + backfills).
+   */
+  id?: string;
   userId: string;
   graphKey: string;
   threadId: string;

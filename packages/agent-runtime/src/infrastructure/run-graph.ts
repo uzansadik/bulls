@@ -112,8 +112,13 @@ async function execute(
   }
 
   // 2. Persist run row (only on first invocation).
+  // Pass `runId` explicitly so the DB row id matches the BullMQ job
+  // id (and the snapshot.runId); otherwise resume would key against
+  // a freshly-generated id and the FK from agent_graph_snapshots
+  // would point nowhere.
   if (isFresh) {
     await agentRuns.create({
+      id: runId,
       userId,
       graphKey,
       threadId,

@@ -13,14 +13,10 @@ import type { IPortfolioRepository } from "./portfolio.port";
 import { DrizzlePortfolioRepository } from "./portfolio.repository";
 import type { IPricingCatalog } from "./pricing.port";
 import { DrizzlePricingRepository } from "./pricing.repository";
-import type { IScheduledJobExecutionRepository } from "./scheduled-job-execution.port";
-import { DrizzleScheduledJobExecutionRepository } from "./scheduled-job-execution.repository";
 import type { ISubscriptionRepository } from "./subscription.port";
 import { DrizzleSubscriptionRepository } from "./subscription.repository";
 import type { IUsageEventRepository } from "./usage-event.port";
 import { DrizzleUsageEventRepository } from "./usage-event.repository";
-import type { IUserScheduledJobRepository } from "./user-scheduled-job.port";
-import { DrizzleUserScheduledJobRepository } from "./user-scheduled-job.repository";
 import type { IWalletRepository } from "./wallet.port";
 import { DrizzleWalletRepository } from "./wallet.repository";
 
@@ -41,8 +37,6 @@ export interface Repositories {
   agentRuns: IAgentRunRepository;
   portfolios: IPortfolioRepository;
   marketAssets: IMarketAssetRepository;
-  scheduledJobs: IUserScheduledJobRepository;
-  scheduledJobExecutions: IScheduledJobExecutionRepository;
 }
 
 /**
@@ -61,8 +55,6 @@ export function createRepositories(db: DB): Repositories {
     agentRuns: new DrizzleAgentRunRepository(db),
     portfolios: new DrizzlePortfolioRepository(db),
     marketAssets: new DrizzleMarketAssetRepository(db),
-    scheduledJobs: new DrizzleUserScheduledJobRepository(db),
-    scheduledJobExecutions: new DrizzleScheduledJobExecutionRepository(db),
   };
 }
 
@@ -105,8 +97,6 @@ export type {
 } from "./portfolio.port";
 export type { IMarketAssetRepository } from "./market-asset.port";
 export type { UpsertMarketAssetInput } from "./market-asset.port";
-export type { IUserScheduledJobRepository } from "./user-scheduled-job.port";
-export type { IScheduledJobExecutionRepository } from "./scheduled-job-execution.port";
 
 // Adapter classes (advanced: only used in tests or custom DI setups).
 export {
@@ -117,9 +107,7 @@ export {
   DrizzlePlanRepository,
   DrizzlePortfolioRepository,
   DrizzlePricingRepository,
-  DrizzleScheduledJobExecutionRepository,
   DrizzleSubscriptionRepository,
   DrizzleUsageEventRepository,
-  DrizzleUserScheduledJobRepository,
   DrizzleWalletRepository,
 };

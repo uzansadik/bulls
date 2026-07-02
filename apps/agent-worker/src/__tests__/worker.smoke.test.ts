@@ -52,14 +52,31 @@ const noopLogger = {
 };
 
 const okBilling: IBillingGateway = {
-  async reserveCredit(): Promise<Result<never, never>> {
-    return ok({} as never);
+  async reserveCredit(): Promise<
+    Result<{ readonly reservationId: string; readonly balanceAfter: string }, never>
+  > {
+    return ok({ reservationId: "res-smoke", balanceAfter: "100" });
   },
-  async finalizeUsage(): Promise<Result<never, never>> {
-    return ok({} as never);
+  async finalizeUsage(): Promise<
+    Result<
+      {
+        readonly reservationId: string;
+        readonly finalCost: string;
+        readonly balanceAfter: string;
+      },
+      never
+    >
+  > {
+    return ok({
+      reservationId: "res-smoke",
+      finalCost: "0.01",
+      balanceAfter: "99.99",
+    });
   },
-  async refundReservation(): Promise<Result<never, never>> {
-    return ok({} as never);
+  async refundReservation(): Promise<
+    Result<{ readonly reservationId: string; readonly balanceAfter: string }, never>
+  > {
+    return ok({ reservationId: "res-smoke", balanceAfter: "100" });
   },
 };
 
@@ -135,7 +152,7 @@ describe("apps/agent-worker smoke", () => {
       userId: "user-1",
       graphKey: "company-analysis" as never,
       threadId: "thread-1" as unknown as ThreadId,
-      input: { symbol: "AAPL" },
+      input: { symbol: "AAPL", estimatedCostUsd: "0.01" },
       enqueuedAt: new Date().toISOString(),
     } satisfies AgentRunJob;
     const enqueueResult = await queue.producer.enqueue(jobPayload);
@@ -153,10 +170,10 @@ describe("apps/agent-worker smoke", () => {
     expect(createCall).toBeDefined();
     const completeCall = repo.calls.find((c) => c.method === "complete");
     expect(completeCall).toBeDefined();
-    // The input was the graph's `{ symbol }` record.
+    // The input was the graph's `{ symbol, estimatedCostUsd }` record.
     expect(createCall?.args).toEqual(
       expect.objectContaining({
-        input: { symbol: "AAPL" },
+        input: { symbol: "AAPL", estimatedCostUsd: "0.01" },
         threadId: "thread-1",
       }),
     );
@@ -185,7 +202,7 @@ describe("apps/agent-worker smoke", () => {
       threadId: "resume-thread",
       userId: "user-2",
       graphKey: "company-analysis" as never,
-      input: { symbol: "MSFT" },
+      input: { symbol: "MSFT", estimatedCostUsd: "0.01" },
     });
     expect(first.status).toBe("completed");
 
@@ -202,7 +219,7 @@ describe("apps/agent-worker smoke", () => {
       threadId: "resume-thread",
       userId: "user-2",
       graphKey: "company-analysis" as never,
-      input: { symbol: "MSFT" },
+      input: { symbol: "MSFT", estimatedCostUsd: "0.01" },
     });
     // Resume on a complete run is a no-op: status stays
     // `completed`, no new snapshot rows.

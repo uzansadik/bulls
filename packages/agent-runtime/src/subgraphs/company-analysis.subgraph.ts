@@ -1,6 +1,9 @@
 import { ToolCallFailedError } from "../domain/errors";
 import { type GraphDefinition, GraphKey } from "../domain/graph";
 import { defineNode } from "../domain/nodes";
+import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
+import { logStep } from "../nodes/log-step-node.js";
+import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
 /**
  * @openbulls/agent-runtime — company-analysis subgraph.
  *
@@ -24,7 +27,6 @@ import { defineNode } from "../domain/nodes";
  * report writer) render from there.
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step-node";
 
 /** Subgraph-specific state extension. */
 export interface CompanyAnalysisScratchpad {
@@ -291,6 +293,8 @@ export const companyAnalysisGraph: GraphDefinition<CompanyAnalysisState> = {
     return { ...base, scratchpad: extension } as unknown as CompanyAnalysisState;
   },
   nodes: [
+    logStep({ stepKey: "reserve-credit" }),
+    reserveCreditNode,
     logStep({ stepKey: "load-company" }),
     loadCompany,
     logStep({ stepKey: "financial-statements" }),
@@ -303,13 +307,17 @@ export const companyAnalysisGraph: GraphDefinition<CompanyAnalysisState> = {
     portfolioImpact,
     logStep({ stepKey: "synthesize-company-analysis" }),
     synthesizeReport,
+    logStep({ stepKey: "finalize-usage" }),
+    finalizeUsageNode,
   ],
   idempotentNodes: new Set([
+    "log-step:reserve-credit",
     "log-step:load-company",
     "log-step:financial-statements",
     "log-step:technical-analysis",
     "log-step:market-news",
     "log-step:portfolio-impact",
     "log-step:synthesize-company-analysis",
+    "log-step:finalize-usage",
   ]),
 };

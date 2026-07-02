@@ -1,6 +1,9 @@
 import { ToolCallFailedError } from "../domain/errors";
 import { type GraphDefinition, GraphKey } from "../domain/graph";
 import { defineNode } from "../domain/nodes";
+import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
+import { logStep } from "../nodes/log-step-node.js";
+import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
 /**
  * @openbulls/agent-runtime — market-news subgraph.
  *
@@ -19,7 +22,6 @@ import { defineNode } from "../domain/nodes";
  * weekly digest, notification dispatcher).
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step-node";
 
 /** A single news headline captured from the provider. */
 export interface NewsHeadline {
@@ -248,6 +250,8 @@ export const marketNewsGraph: GraphDefinition<MarketNewsState> = {
     return { ...base, scratchpad } as unknown as MarketNewsState;
   },
   nodes: [
+    logStep({ stepKey: "reserve-credit" }),
+    reserveCreditNode,
     logStep({ stepKey: "expand-symbols" }),
     expandSymbols,
     logStep({ stepKey: "fetch-news" }),
@@ -256,11 +260,15 @@ export const marketNewsGraph: GraphDefinition<MarketNewsState> = {
     dedupeGroup,
     logStep({ stepKey: "summarize-news" }),
     summarize,
+    logStep({ stepKey: "finalize-usage" }),
+    finalizeUsageNode,
   ],
   idempotentNodes: new Set([
+    "log-step:reserve-credit",
     "log-step:expand-symbols",
     "log-step:fetch-news",
     "log-step:dedupe-group",
     "log-step:summarize-news",
+    "log-step:finalize-usage",
   ]),
 };

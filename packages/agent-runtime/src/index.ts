@@ -33,6 +33,8 @@ export {
   BudgetExceededError,
   NodeExecutionFailedError,
   ToolCallFailedError,
+  RunNotResumableError,
+  InvalidRunInputError,
 } from "./domain/errors";
 export {
   GraphRegistry,
@@ -105,6 +107,15 @@ export {
 export { runGraph, resumeRun, pauseRun } from "./infrastructure/run-graph";
 export { registerDefaultGraphs } from "./infrastructure/register-default-graphs";
 export { DrizzleCheckpointerSaver } from "./infrastructure/checkpointer.saver";
+
+// Billing guard nodes — agent subgraphs should mount `reserveCreditNode`
+// at the entry and `finalizeUsageNode` at the exit (CLAUDE.md §11).
+// `pauseCreditInsufficientNode` is a recovery terminal kept for
+// explicit error-routing diagrams; runtime catches the error itself.
+export { reserveCreditNode } from "./nodes/reserve-credit.node.js";
+export { finalizeUsageNode } from "./nodes/finalize-usage.node.js";
+export { pauseCreditInsufficientNode } from "./nodes/pause-credit-insufficient.node.js";
+export { logStep } from "./nodes/log-step-node.js";
 
 // Public types
 export type {

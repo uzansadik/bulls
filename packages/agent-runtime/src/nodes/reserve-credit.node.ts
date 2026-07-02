@@ -19,6 +19,11 @@ const DEFAULT_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
 export const reserveCreditNode: NodeDefinition<AgentRunState> = {
   name: "reserve-credit",
+  /**
+   * Idempotent: if a prior invocation already produced a reservationId
+   * the node skips the gateway call — important for resume.
+   */
+  idempotent: true,
   async run(state, deps: NodeDeps) {
     const billing = deps.billing;
     if (!billing) {
@@ -27,6 +32,15 @@ export const reserveCreditNode: NodeDefinition<AgentRunState> = {
     const estimated = state.budget?.estimatedCost;
     if (!estimated) {
       throw new NodeExecutionFailedError("reserve-credit", "state.budget.estimatedCost missing");
+    }
+    // Resume-skip: a previous attempt already locked the credit.
+    const existingReservationId = state.budget?.reservationId;
+    if (existingReservationId) {
+      deps.logger.info("credit reservation already present — skipping", {
+        runId: state.runId,
+        reservationId: existingReservationId,
+      });
+      return {};
     }
     const expiresAt = new Date(deps.now() + DEFAULT_TTL_MS);
     const result = await billing.reserveCredit({

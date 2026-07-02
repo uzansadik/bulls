@@ -8,7 +8,12 @@ import { createAgentRuntimeServices } from "../infrastructure/composition";
 import { InMemoryAgentRunRepository } from "./in-memory-agent-run-repo.mock";
 import { InMemoryCheckpointer } from "./in-memory-checkpointer.mock";
 
-const noopLogger = { info: () => undefined, warn: () => undefined, error: () => undefined };
+const noopLogger = {
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: () => undefined,
+};
 
 const failingGraph = (key: string): GraphDefinition<AgentRunState> => ({
   key: GraphKey(key),

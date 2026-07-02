@@ -1,6 +1,9 @@
 import { ToolCallFailedError } from "../domain/errors";
 import { type GraphDefinition, GraphKey } from "../domain/graph";
 import { defineNode } from "../domain/nodes";
+import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
+import { logStep } from "../nodes/log-step-node.js";
+import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
 /**
  * @openbulls/agent-runtime — portfolio-review subgraph.
  *
@@ -18,7 +21,6 @@ import { defineNode } from "../domain/nodes";
  * the analysis chain.
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step-node";
 
 /** Subgraph-specific state extension. */
 export interface PortfolioReviewScratchpad {
@@ -250,6 +252,8 @@ export const portfolioReviewGraph: GraphDefinition<PortfolioReviewState> = {
     return { ...base, scratchpad: extension } as unknown as PortfolioReviewState;
   },
   nodes: [
+    logStep({ stepKey: "reserve-credit" }),
+    reserveCreditNode,
     logStep({ stepKey: "load-portfolio" }),
     loadPortfolio,
     logStep({ stepKey: "calculate-performance" }),
@@ -260,12 +264,16 @@ export const portfolioReviewGraph: GraphDefinition<PortfolioReviewState> = {
     recommendations,
     logStep({ stepKey: "synthesize-portfolio-review" }),
     synthesizeReport,
+    logStep({ stepKey: "finalize-usage" }),
+    finalizeUsageNode,
   ],
   idempotentNodes: new Set([
+    "log-step:reserve-credit",
     "log-step:load-portfolio",
     "log-step:calculate-performance",
     "log-step:risk-flags",
     "log-step:recommendations",
     "log-step:synthesize-portfolio-review",
+    "log-step:finalize-usage",
   ]),
 };
