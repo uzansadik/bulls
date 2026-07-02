@@ -9,9 +9,9 @@
  * boot, not at runtime.
  */
 
-type NodeEnv = "development" | "test" | "production";
+type NodeEnv = 'development' | 'test' | 'production';
 
-const NODE_ENV = (process.env.NODE_ENV ?? "development") as NodeEnv;
+const NODE_ENV = (process.env.NODE_ENV ?? 'development') as NodeEnv;
 
 interface ServerEnv {
   NODE_ENV: NodeEnv;
@@ -78,10 +78,10 @@ export function serverEnv(): ServerEnv {
   };
   const env: ServerEnv = {
     NODE_ENV,
-    DATABASE_URL: required("DATABASE_URL"),
-    BETTER_AUTH_SECRET: required("BETTER_AUTH_SECRET"),
-    BETTER_AUTH_URL: required("BETTER_AUTH_URL"),
-    LOG_LEVEL: process.env.LOG_LEVEL ?? "info",
+    DATABASE_URL: required('DATABASE_URL'),
+    BETTER_AUTH_SECRET: required('BETTER_AUTH_SECRET'),
+    BETTER_AUTH_URL: required('BETTER_AUTH_URL'),
+    LOG_LEVEL: process.env.LOG_LEVEL ?? 'info',
     REDIS_URL: process.env.REDIS_URL,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
@@ -100,14 +100,21 @@ export function serverEnv(): ServerEnv {
     SENTRY_DSN: process.env.SENTRY_DSN,
     OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     // Agent worker (Faz 3) — sane defaults so worker boots in dev without setup.
-    WORKER_QUEUE_NAME: process.env.WORKER_QUEUE_NAME ?? "agent-runs",
-    WORKER_CONCURRENCY: optionalNumber("WORKER_CONCURRENCY", 4),
-    WORKER_RATE_LIMIT_PER_MIN: optionalNumber("WORKER_RATE_LIMIT_PER_MIN", 120),
-    WORKER_HEARTBEAT_INTERVAL_MS: optionalNumber("WORKER_HEARTBEAT_INTERVAL_MS", 30_000),
-    AGENT_GRAPH_DEFAULT_MODEL: process.env.AGENT_GRAPH_DEFAULT_MODEL ?? "claude-fable-5",
-    AGENT_GRAPH_MAX_RETRIES: optionalNumber("AGENT_GRAPH_MAX_RETRIES", 3),
-    AGENT_GRAPH_CHECKPOINT_EVERY_N_STEPS: optionalNumber("AGENT_GRAPH_CHECKPOINT_EVERY_N_STEPS", 1),
-    AGENT_JOB_TIMEOUT_MS: optionalNumber("AGENT_JOB_TIMEOUT_MS", 3_600_000),
+    WORKER_QUEUE_NAME: process.env.WORKER_QUEUE_NAME ?? 'agent-runs',
+    WORKER_CONCURRENCY: optionalNumber('WORKER_CONCURRENCY', 4),
+    WORKER_RATE_LIMIT_PER_MIN: optionalNumber('WORKER_RATE_LIMIT_PER_MIN', 120),
+    WORKER_HEARTBEAT_INTERVAL_MS: optionalNumber(
+      'WORKER_HEARTBEAT_INTERVAL_MS',
+      30_000,
+    ),
+    AGENT_GRAPH_DEFAULT_MODEL:
+      process.env.AGENT_GRAPH_DEFAULT_MODEL ?? 'claude-fable-5',
+    AGENT_GRAPH_MAX_RETRIES: optionalNumber('AGENT_GRAPH_MAX_RETRIES', 3),
+    AGENT_GRAPH_CHECKPOINT_EVERY_N_STEPS: optionalNumber(
+      'AGENT_GRAPH_CHECKPOINT_EVERY_N_STEPS',
+      1,
+    ),
+    AGENT_JOB_TIMEOUT_MS: optionalNumber('AGENT_JOB_TIMEOUT_MS', 3_600_000),
   };
   cachedServer = env;
   return env;
@@ -119,7 +126,8 @@ export function serverEnv(): ServerEnv {
 export function publicEnv(): PublicEnv {
   if (cachedPublic) return cachedPublic;
   cachedPublic = {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    NEXT_PUBLIC_APP_URL:
+      process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
   };
   return cachedPublic;
 }

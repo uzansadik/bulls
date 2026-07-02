@@ -20,6 +20,9 @@ openbulls/
 │  │  │  │  │  └─ settings/
 │  │  │  │  │     └─ page.tsx
 │  │  │  ├─ api/
+│  │  │  │  ├─ auth/
+│  │  │  │  │  └─ [...all]/
+│  │  │  │  │     └─ route.ts
 │  │  │  │  ├─ chat/
 │  │  │  │  │  └─ route.ts
 │  │  │  │  ├─ webhooks/
@@ -30,6 +33,22 @@ openbulls/
 │  │  │  │  └─ cron/
 │  │  │  │     └─ trigger/
 │  │  │  │        └─ route.ts
+│  │  │  ├─ [locale]/
+│  │  │  │  ├─ (auth)/
+│  │  │  │  │  ├─ layout.tsx
+│  │  │  │  │  ├─ sign-in/
+│  │  │  │  │  │  └─ page.tsx
+│  │  │  │  │  └─ sign-up/
+│  │  │  │  │     └─ page.tsx
+│  │  │  │  ├─ (dashboard)/
+│  │  │  │  │  ├─ layout.tsx
+│  │  │  │  │  ├─ page.tsx
+│  │  │  │  │  ├─ chat/
+│  │  │  │  │  │  ├─ page.tsx
+│  │  │  │  │  │  └─ [sessionId]/
+│  │  │  │  │  │     └─ page.tsx
+│  │  │  │  ├─ layout.tsx
+│  │  │  │  └─ page.tsx
 │  │  │  ├─ layout.tsx
 │  │  │  └─ page.tsx
 │  │  ├─ features/
@@ -40,13 +59,18 @@ openbulls/
 │  │  │  │  │  ├─ model-selector.tsx
 │  │  │  │  │  ├─ tool-call-card.tsx
 │  │  │  │  │  ├─ sources-list.tsx
-│  │  │  │  │  └─ prompt-input.tsx
+│  │  │  │  │  ├─ prompt-input.tsx
+│  │  │  │  │  ├─ session-sidebar.tsx
+│  │  │  │  │  └─ agent-mode-toggle.tsx
 │  │  │  │  ├─ actions/
 │  │  │  │  │  ├─ list-chat-sessions.action.ts
 │  │  │  │  │  ├─ get-chat-session.action.ts
-│  │  │  │  │  └─ update-chat-title.action.ts
-│  │  │  │  └─ hooks/
-│  │  │  │     └─ use-chat-model.ts
+│  │  │  │  │  ├─ create-chat-session.action.ts
+│  │  │  │  │  └─ save-chat-message.action.ts
+│  │  │  │  ├─ hooks/
+│  │  │  │  │  └─ use-chat-model.ts
+│  │  │  │  └─ schemas/
+│  │  │  │     └─ chat-session.schema.ts
 │  │  │  ├─ portfolio/
 │  │  │  │  ├─ components/
 │  │  │  │  │  ├─ portfolio-overview-cards.tsx
@@ -77,6 +101,9 @@ openbulls/
 │  │  │        └─ create-checkout-session.action.ts
 │  │  ├─ components/
 │  │  ├─ lib/
+│  │  │  ├─ auth.ts
+│  │  │  └─ ai/
+│  │  │     └─ tool-registry.ts
 │  │  ├─ proxy.ts
 │  │  └─ next.config.ts
 │  │
@@ -94,22 +121,19 @@ openbulls/
 │  ├─ agent-worker/
 │  │  ├─ src/
 │  │  │  ├─ index.ts
-│  │  │  ├─ workers/
-│  │  │  │  ├─ langgraph-run.worker.ts
-│  │  │  │  ├─ scheduled-job.worker.ts
-│  │  │  │  ├─ portfolio-review.worker.ts
-│  │  │  │  ├─ report-generation.worker.ts
-│  │  │  │  ├─ market-data-refresh.worker.ts
-│  │  │  │  └─ notification.worker.ts
-│  │  │  ├─ processors/
-│  │  │  │  ├─ langgraph-run.processor.ts
-│  │  │  │  ├─ scheduled-job.processor.ts
-│  │  │  │  ├─ portfolio-review.processor.ts
-│  │  │  │  ├─ report-generation.processor.ts
-│  │  │  │  ├─ market-data-refresh.processor.ts
-│  │  │  │  └─ notification.processor.ts
-│  │  │  └─ health/
-│  │  │     └─ healthcheck.ts
+│  │  │  ├─ process.ts
+│  │  │  ├─ job-handler.ts
+│  │  │  ├─ heartbeat.ts
+│  │  │  ├─ infrastructure/
+│  │  │  │  ├─ model-adapter.ts
+│  │  │  │  ├─ billing-adapter.ts
+│  │  │  │  ├─ portfolio-adapter.ts
+│  │  │  │  ├─ market-data-adapter.ts
+│  │  │  │  └─ jobs-adapter.ts
+│  │  │  └─ __tests__/
+│  │  │     ├─ setup.ts
+│  │  │     ├─ in-memory-queue.mock.ts
+│  │  │     └─ worker.smoke.test.ts
 │  │  ├─ package.json
 │  │  ├─ tsconfig.json
 │  │  └─ tsup.config.ts
@@ -344,56 +368,37 @@ openbulls/
 │  │  ├─ tsup.config.ts
 │  │  └─ src/
 │  │     ├─ index.ts
-│  │     ├─ gateway/
-│  │     │  ├─ vercel-ai-gateway.client.ts
-│  │     │  ├─ langchain-model.factory.ts
-│  │     │  ├─ ai-sdk-model.factory.ts
-│  │     │  ├─ model-registry.ts
-│  │     │  ├─ provider-registry.ts
-│  │     │  └─ model-pricing.ts
-│  │     ├─ tools/
-│  │     │  ├─ registry/
-│  │     │  │  ├─ tool-registry.ts
-│  │     │  │  ├─ tool-selector.ts
-│  │     │  │  └─ tool-permissions.ts
-│  │     │  ├─ portfolio/
-│  │     │  │  ├─ add-transaction.tool.ts
-│  │     │  │  ├─ get-portfolio-overview.tool.ts
-│  │     │  │  ├─ get-positions.tool.ts
-│  │     │  │  └─ calculate-portfolio-health.tool.ts
-│  │     │  ├─ market-data/
-│  │     │  │  ├─ get-delayed-price.tool.ts
-│  │     │  │  ├─ get-price-history.tool.ts
-│  │     │  │  ├─ get-fx-rate.tool.ts
-│  │     │  │  ├─ get-technical-indicators.tool.ts
-│  │     │  │  ├─ get-financial-ratios.tool.ts
-│  │     │  │  └─ search-market-news.tool.ts
-│  │     │  ├─ financials/
-│  │     │  │  ├─ get-financial-statement.tool.ts
-│  │     │  │  ├─ get-income-statement.tool.ts
-│  │     │  │  ├─ get-balance-sheet.tool.ts
-│  │     │  │  ├─ get-cash-flow.tool.ts
-│  │     │  │  └─ analyze-financial-statement.tool.ts
-│  │     │  └─ automation/
-│  │     │     ├─ create-scheduled-job.tool.ts
-│  │     │     ├─ pause-scheduled-job.tool.ts
-│  │     │     └─ list-scheduled-jobs.tool.ts
-│  │     ├─ prompts/
-│  │     │  ├─ system/
-│  │     │  │  ├─ default-system.prompt.ts
-│  │     │  │  ├─ finance-system.prompt.ts
-│  │     │  │  └─ safety.prompt.ts
-│  │     │  ├─ agents/
-│  │     │  └─ workflows/
-│  │     ├─ memory/
-│  │     │  ├─ user-memory.service.ts
-│  │     │  ├─ conversation-memory.service.ts
-│  │     │  ├─ investment-preference-memory.ts
-│  │     │  └─ memory-policy.ts
-│  │     └─ telemetry/
-│  │        ├─ ai-usage-extractor.ts
-│  │        ├─ ai-event-recorder.ts
-│  │        └─ source-normalizer.ts
+│  │     ├─ domain/
+│  │     │  ├─ errors.ts
+│  │     │  ├─ model/
+│  │     │  │  ├─ model-descriptor.ts
+│  │     │  │  └─ model-pricing.ts
+│  │     │  ├─ tool/
+│  │     │  │  ├─ tool-spec.ts
+│  │     │  │  └─ tool-permission.ts
+│  │     │  ├─ prompt/
+│  │     │  │  └─ prompt-template.ts
+│  │     │  └─ memory/
+│  │     │     └─ conversation-memory.ts
+│  │     ├─ application/
+│  │     │  ├─ resolve-model.query.ts
+│  │     │  ├─ list-available-models.query.ts
+│  │     │  ├─ tool-registry.service.ts
+│  │     │  ├─ tool-selector.service.ts
+│  │     │  └─ default-tool-registry.factory.ts
+│  │     └─ infrastructure/
+│  │        ├─ gateway/
+│  │        │  ├─ vercel-ai-gateway.client.ts
+│  │        │  ├─ ai-sdk-model.factory.ts
+│  │        │  └─ langchain-model.factory.ts
+│  │        ├─ tools/
+│  │        │  ├─ portfolio-tools.ts
+│  │        │  ├─ market-data-tools.ts
+│  │        │  ├─ financials-tools.ts
+│  │        │  └─ automation-tools.ts
+│  │        └─ prompts/
+│  │           ├─ default-system.prompt.ts
+│  │           └─ finance-system.prompt.ts
 │  │
 │  ├─ agent-runtime/
 │  │  ├─ package.json
@@ -401,67 +406,41 @@ openbulls/
 │  │  ├─ tsup.config.ts
 │  │  └─ src/
 │  │     ├─ index.ts
-│  │     ├─ langgraph/
-│  │     │  ├─ graph-registry.ts
-│  │     │  ├─ graph-runner.ts
-│  │     │  ├─ graph-checkpointer.ts
-│  │     │  ├─ graph-state.ts
-│  │     │  ├─ graph-context.ts
-│  │     │  └─ graph-events.ts
-│  │     ├─ graphs/
-│  │     │  ├─ portfolio-review.graph.ts
-│  │     │  ├─ company-analysis.graph.ts
-│  │     │  ├─ technical-analysis.graph.ts
-│  │     │  ├─ deep-research.graph.ts
-│  │     │  ├─ transaction-capture.graph.ts
-│  │     │  └─ report-generation.graph.ts
+│  │     ├─ domain/
+│  │     │  ├─ errors.ts
+│  │     │  ├─ state.ts
+│  │     │  ├─ state-helpers.ts
+│  │     │  ├─ graph.ts
+│  │     │  ├─ langgraph-annotation.ts
+│  │     │  ├─ langgraph-node.ts
+│  │     │  └─ ports/
+│  │     │     ├─ agent-run-repository.port.ts
+│  │     │     ├─ billing-gateway.port.ts
+│  │     │     ├─ jobs-gateway.port.ts
+│  │     │     ├─ market-data-gateway.port.ts
+│  │     │     ├─ model-gateway.port.ts
+│  │     │     └─ portfolio-gateway.port.ts
+│  │     ├─ infrastructure/
+│  │     │  ├─ composition.ts
+│  │     │  ├─ agent-runtime.types.ts
+│  │     │  ├─ graph-factory.ts
+│  │     │  ├─ postgres-checkpointer.ts
+│  │     │  └─ register-default-graphs.ts
 │  │     ├─ nodes/
-│  │     │  ├─ router.node.ts
-│  │     │  ├─ portfolio/
-│  │     │  │  ├─ load-portfolio.node.ts
-│  │     │  │  ├─ calculate-portfolio-health.node.ts
-│  │     │  │  └─ generate-portfolio-advice.node.ts
-│  │     │  ├─ market-data/
-│  │     │  │  ├─ load-prices.node.ts
-│  │     │  │  ├─ load-financial-statements.node.ts
-│  │     │  │  ├─ calculate-ratios.node.ts
-│  │     │  │  └─ calculate-indicators.node.ts
-│  │     │  ├─ research/
-│  │     │  │  ├─ plan-research.node.ts
-│  │     │  │  ├─ run-parallel-research.node.ts
-│  │     │  │  ├─ summarize-sources.node.ts
-│  │     │  │  └─ synthesize-answer.node.ts
-│  │     │  ├─ billing/
-│  │     │  │  ├─ reserve-credit.node.ts
-│  │     │  │  ├─ finalize-usage.node.ts
-│  │     │  │  └─ pause-credit-insufficient.node.ts
-│  │     │  └─ human/
-│  │     │     ├─ request-approval.node.ts
-│  │     │     └─ wait-for-user-input.node.ts
-│  │     ├─ state/
-│  │     │  ├─ portfolio-review.state.ts
-│  │     │  ├─ company-analysis.state.ts
-│  │     │  ├─ deep-research.state.ts
-│  │     │  ├─ report-generation.state.ts
-│  │     │  └─ shared-agent.state.ts
-│  │     ├─ persistence/
-│  │     │  ├─ drizzle-checkpointer.ts
-│  │     │  ├─ agent-run.repository.ts
-│  │     │  ├─ agent-run-step.repository.ts
-│  │     │  └─ graph-snapshot.repository.ts
-│  │     ├─ subagents/
-│  │     │  ├─ portfolio-advisor.subagent.ts
-│  │     │  ├─ financial-statement.subagent.ts
-│  │     │  ├─ technical-analysis.subagent.ts
-│  │     │  ├─ research.subagent.ts
-│  │     │  ├─ risk-profile.subagent.ts
-│  │     │  └─ report-writer.subagent.ts
-│  │     └─ events/
-│  │        ├─ agent-run-started.event.ts
-│  │        ├─ agent-run-paused.event.ts
-│  │        ├─ agent-run-resumed.event.ts
-│  │        ├─ agent-run-completed.event.ts
-│  │        └─ agent-node-completed.event.ts
+│  │     │  ├─ call-model.node.ts
+│  │     │  ├─ reserve-credit.node.ts
+│  │     │  ├─ finalize-usage.node.ts
+│  │     │  ├─ pause-credit-insufficient.node.ts
+│  │     │  └─ log-step-node.ts
+│  │     ├─ subgraphs/
+│  │     │  ├─ company-analysis.subgraph.ts
+│  │     │  ├─ portfolio-review.subgraph.ts
+│  │     │  └─ market-news.subgraph.ts
+│  │     └─ __tests__/
+│  │        ├─ setup.ts
+│  │        ├─ composition.test.ts
+│  │        ├─ state-helpers.test.ts
+│  │        └─ in-memory-agent-run-repo.mock.ts
 │  │
 │  ├─ automation/
 │  │  ├─ src/
