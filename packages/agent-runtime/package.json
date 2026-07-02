@@ -22,10 +22,13 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@langchain/core": "latest",
+    "@langchain/langgraph": "latest",
     "@openbulls/billing": "workspace:*",
     "@openbulls/db": "workspace:*",
     "@openbulls/jobs": "workspace:*",
     "@openbulls/shared": "workspace:*",
+    "langchain": "latest",
     "zod": "^3.23.8"
   },
   "devDependencies": {
