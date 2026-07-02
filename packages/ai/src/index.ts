@@ -1,14 +1,11 @@
 /**
  * @openbulls/ai — public barrel.
  *
- * Faz 4 foundation: the domain types every other layer (gateway,
- * tools, prompts, telemetry) depends on. Application + infrastructure
- * layers will be exported in later commits as they land.
- *
- * Each helper carries both a `type` (compile-time) and a `const`
- * (runtime) export under the same identifier. The barrel separates
- * the two with `export type { ... }` and `export { ... }` blocks so
- * downstream consumers can pick whichever fits.
+ * Faz 4 surface. Each helper carries both a `type` (compile-time)
+ * and a `const` (runtime) export under the same identifier. The
+ * barrel separates the two with `export type { ... }` and
+ * `export { ... }` blocks so downstream consumers can pick
+ * whichever fits.
  */
 
 // Errors
@@ -65,3 +62,23 @@ export {
   ConversationMemory,
   DEFAULT_CONVERSATION_MEMORY,
 } from "./domain/memory/conversation-memory";
+
+// Gateway
+export type {
+  VercelAiGatewayClient,
+  CreateVercelAiGatewayClientOptions,
+} from "./infrastructure/gateway/vercel-ai-gateway.client";
+export { createVercelAiGatewayClient } from "./infrastructure/gateway/vercel-ai-gateway.client";
+export type { CreateAiSdkModelOptions } from "./infrastructure/gateway/ai-sdk-model.factory";
+export { createAiSdkModel } from "./infrastructure/gateway/ai-sdk-model.factory";
+export type { CreateLangChainModelOptions } from "./infrastructure/gateway/langchain-model.factory";
+export { createLangChainModel } from "./infrastructure/gateway/langchain-model.factory";
+
+// Application queries
+export type { ListAvailableModelsOptions } from "./application/list-available-models.query";
+export {
+  defaultModelRegistry,
+  listAvailableModels,
+} from "./application/list-available-models.query";
+export type { ResolveModelOptions } from "./application/resolve-model.query";
+export { resolveModel } from "./application/resolve-model.query";

@@ -16,9 +16,18 @@
     "clean": "rm -rf .turbo"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
+    "@ai-sdk/gateway": "^4.0.0",
+    "@ai-sdk/google": "^2.0.0",
+    "@ai-sdk/openai": "^2.0.0",
+    "@langchain/anthropic": "^0.3.0",
+    "@langchain/core": "^0.3.0",
+    "@langchain/google-genai": "^0.1.0",
+    "@langchain/openai": "^0.3.0",
     "@openbulls/config": "workspace:*",
     "@openbulls/db": "workspace:*",
     "@openbulls/shared": "workspace:*",
+    "ai": "^7.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
