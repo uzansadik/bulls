@@ -63,9 +63,9 @@ export type CompanyAnalysisState = AgentRunState & CompanyAnalysisScratchpad;
 
 /**
  * Cast the base-state scratchpad (typed as `Record<string, unknown>`)
- * to the subgraph-specific shape. The graph runner preserves the
- * scratchpad across node invocations, so a `Partial<S>` merge in one
- * node is visible to the next node when read via this helper.
+ * to the typed subgraph shape. The runner preserves the scratchpad
+ * across node invocations, so a `Partial<S>` merge in one node is
+ * visible to the next when read via this helper.
  */
 function pad(state: CompanyAnalysisState): CompanyAnalysisScratchpad {
   return state.scratchpad as unknown as CompanyAnalysisScratchpad;
@@ -90,10 +90,11 @@ const loadCompany = defineNode<CompanyAnalysisState>({
     if (!md) {
       throw new ToolCallFailedError("market-data", "gateway missing from deps");
     }
-    const quote = await md.getQuote({ symbol: state.symbol });
+    const scratch = pad(state);
+    const quote = await md.getQuote({ symbol: scratch.symbol });
     deps.logger.info("company-analysis: quote loaded", {
       runId: state.runId,
-      symbol: state.symbol,
+      symbol: scratch.symbol,
     });
     return {
       scratchpad: { ...pad(state), quote },
@@ -109,11 +110,12 @@ const financialStatements = defineNode<CompanyAnalysisState>({
     if (!md) {
       throw new ToolCallFailedError("market-data", "gateway missing from deps");
     }
-    const statements = await md.getFinancialStatements({ symbol: state.symbol });
-    const insight = `Financial statements loaded for ${state.symbol}; ratios derive from the most recent reporting period.`;
+    const scratch = pad(state);
+    const statements = await md.getFinancialStatements({ symbol: scratch.symbol });
+    const insight = `Financial statements loaded for ${scratch.symbol}; ratios derive from the most recent reporting period.`;
     deps.logger.info("company-analysis: financial-statements", {
       runId: state.runId,
-      symbol: state.symbol,
+      symbol: scratch.symbol,
     });
     return {
       scratchpad: {
@@ -132,12 +134,13 @@ const technicalAnalysis = defineNode<CompanyAnalysisState>({
     if (!md) {
       throw new ToolCallFailedError("market-data", "gateway missing from deps");
     }
+    const scratch = pad(state);
     const candles = await md.getCandles({
-      symbol: state.symbol,
+      symbol: scratch.symbol,
       interval: "1d",
       limit: 200,
     });
-    const insight = `Technical indicators computed from 200 daily candles for ${state.symbol}; see state.technical.indicators for raw values.`;
+    const insight = `Technical indicators computed from 200 daily candles for ${scratch.symbol}; see state.technical.indicators for raw values.`;
     return {
       scratchpad: {
         ...pad(state),
@@ -159,12 +162,13 @@ const marketNews = defineNode<CompanyAnalysisState>({
     if (!md) {
       throw new ToolCallFailedError("market-data", "gateway missing from deps");
     }
-    const items = await md.getNews({ symbols: [state.symbol] });
+    const scratch = pad(state);
+    const items = await md.getNews({ symbols: [scratch.symbol] });
     const grouped = items.slice(0, 10).map((item) => ({
       headline: String((item as { headline?: unknown })?.headline ?? ""),
       weight: 1,
     }));
-    const insight = `Captured ${items.length} news items for ${state.symbol}.`;
+    const insight = `Captured ${items.length} news items for ${scratch.symbol}.`;
     return {
       scratchpad: {
         ...pad(state),
@@ -194,7 +198,7 @@ const portfolioImpact = defineNode<CompanyAnalysisState>({
       };
     }
     const holdings = await deps.portfolio.getHoldings({ portfolioId });
-    const impact = `Cross-checked ${holdings.length} portfolio positions against ${state.symbol} exposure.`;
+    const impact = `Cross-checked ${holdings.length} portfolio positions against ${scratch.symbol} exposure.`;
     return {
       scratchpad: {
         ...scratch,
@@ -210,7 +214,7 @@ const synthesizeReport = defineNode<CompanyAnalysisState>({
   async run(state, deps) {
     const scratch = pad(state);
     const parts: string[] = [];
-    parts.push(`# Company Analysis: ${state.symbol}`);
+    parts.push(`# Company Analysis: ${pad(state).symbol}`);
     parts.push("");
     if (scratch.quote) {
       parts.push("## Quote");
@@ -240,7 +244,7 @@ const synthesizeReport = defineNode<CompanyAnalysisState>({
     const report = parts.join("\n");
     deps.logger.info("company-analysis: report synthesized", {
       runId: state.runId,
-      symbol: state.symbol,
+      symbol: scratch.symbol,
       length: report.length,
     });
     return {
@@ -284,7 +288,7 @@ export const companyAnalysisGraph: GraphDefinition<CompanyAnalysisState> = {
       scope: payload.scope ?? "full",
       ...(payload.portfolioId ? { portfolioId: payload.portfolioId } : {}),
     };
-    return { ...base, ...extension } as CompanyAnalysisState;
+    return { ...base, scratchpad: extension } as unknown as CompanyAnalysisState;
   },
   nodes: [
     logStep({ stepKey: "load-company" }),

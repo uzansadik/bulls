@@ -54,9 +54,10 @@ export interface MarketNewsScratchpad {
 export type MarketNewsState = AgentRunState & MarketNewsScratchpad;
 
 /**
- * Cast the base-state scratchpad to the typed subgraph shape. See
- * company-analysis.subgraph.ts and portfolio-review.subgraph.ts for
- * the same pattern.
+ * Cast the base-state scratchpad (typed as `Record<string, unknown>`)
+ * to the typed subgraph shape. The run-graph runner preserves the
+ * scratchpad across node invocations, so `Partial<S>` merges that
+ * carry only `scratchpad` flow through cleanly.
  */
 function pad(state: MarketNewsState): MarketNewsScratchpad {
   return state.scratchpad as unknown as MarketNewsScratchpad;
@@ -238,13 +239,13 @@ export const marketNewsGraph: GraphDefinition<MarketNewsState> = {
       toolInvocations: [],
       ...(payload.estimatedCostUsd ? { budget: { estimatedCost: payload.estimatedCostUsd } } : {}),
     };
-    const extension: MarketNewsScratchpad = {
+    const scratchpad: MarketNewsScratchpad = {
       symbols,
       ...(payload.from ? { from: payload.from } : {}),
       ...(payload.to ? { to: payload.to } : {}),
       ...(payload.limit !== undefined ? { limit: payload.limit } : {}),
     };
-    return { ...base, ...extension } as MarketNewsState;
+    return { ...base, scratchpad } as unknown as MarketNewsState;
   },
   nodes: [
     logStep({ stepKey: "expand-symbols" }),

@@ -42,8 +42,10 @@ export interface PortfolioReviewScratchpad {
 export type PortfolioReviewState = AgentRunState & PortfolioReviewScratchpad;
 
 /**
- * Cast the base-state scratchpad to the typed subgraph shape. See
- * company-analysis.subgraph.ts for the same pattern.
+ * Cast the base-state scratchpad (typed as `Record<string, unknown>`)
+ * to the typed subgraph shape. The runner preserves the scratchpad
+ * across node invocations, so a `Partial<S>` merge in one node is
+ * visible to the next when read via this helper.
  */
 function pad(state: PortfolioReviewState): PortfolioReviewScratchpad {
   return state.scratchpad as unknown as PortfolioReviewScratchpad;
@@ -245,7 +247,7 @@ export const portfolioReviewGraph: GraphDefinition<PortfolioReviewState> = {
       ...(payload.from ? { from: payload.from } : {}),
       ...(payload.to ? { to: payload.to } : {}),
     };
-    return { ...base, ...extension } as PortfolioReviewState;
+    return { ...base, scratchpad: extension } as unknown as PortfolioReviewState;
   },
   nodes: [
     logStep({ stepKey: "load-portfolio" }),
