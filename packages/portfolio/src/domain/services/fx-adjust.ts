@@ -68,17 +68,17 @@ export function convert(
   if (direct) {
     return multiplyMoney(amount, direct.rate);
   }
-  // Cross: try via `to` (rate from→to) or via "USD"/"TRY" anchors.
-  // Without a richer API surface we attempt the symbolic
-  // derivation once via base currency "USD" if present.
+  // Cross-pair via a common anchor. We need
+  //   rate(from → to) = rate(from → X) / rate(to → X)
+  // so we look up *both* legs with anchor as the quote currency
+  // (the test fixture stores e.g. `EUR→TRY` and `USD→TRY`).
   for (const anchor of ["TRY", "USD", "EUR"] as Currency[]) {
     if (anchor === from || anchor === to) continue;
     const leg1 = rates.getRate(from, anchor);
-    const leg2 = rates.getRate(anchor, to);
+    const leg2 = rates.getRate(to, anchor);
     if (leg1 && leg2) {
-      // Convert amount to anchor, then to target.
-      const stage1 = multiplyMoney(amount, leg1.rate);
-      return multiplyMoney(stage1, leg2.rate);
+      // rate(from → to) = leg1.rate / leg2.rate
+      return multiplyMoney(amount, leg1.rate / leg2.rate);
     }
   }
   return null;

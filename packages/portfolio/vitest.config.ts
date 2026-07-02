@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -5,8 +6,16 @@ import { defineConfig } from "vitest/config";
  * for tests). Node environment; MSW intercepts outbound fetches for
  * the market-data gateway in tests that need it. Pure-domain tests
  * run without MSW (no network).
+ *
+ * `@__tests__` alias maps to `src/__tests__/` so test files can use
+ * shorter import paths (e.g. `import { ... } from "@__tests__/aliases"`).
  */
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@__tests__": resolve(__dirname, "src/__tests__"),
+    },
+  },
   test: {
     environment: "node",
     setupFiles: ["./__tests__/setup.ts"],
