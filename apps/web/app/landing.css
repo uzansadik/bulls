@@ -24,21 +24,6 @@
   }
 }
 
-@keyframes scan {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  10%,
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-}
-
 @keyframes reveal-up {
   from {
     opacity: 0;
@@ -66,16 +51,6 @@
     transform: translate(-50%, -50%) scale(1);
   }
 }
-  .animate-flow {
-    stroke-dasharray: 4 5;
-    animation: flow 0.9s linear infinite;
-  }
-  .animate-node-pop {
-    animation: node-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .animate-typing-dot {
-    animation: typing-dot 1.2s ease-in-out infinite;
-  }
 
 @keyframes typing-dot {
   0%,
@@ -94,9 +69,6 @@
   .animate-blob {
     animation: blob 9s infinite ease-in-out;
   }
-  .animate-scan {
-    animation: scan 2.4s linear infinite;
-  }
   .animate-reveal {
     opacity: 0;
     transform: translateY(24px);
@@ -105,6 +77,16 @@
   .animate-reveal[data-revealed="true"] {
     opacity: 1;
     transform: translateY(0);
+  }
+  .animate-flow {
+    stroke-dasharray: 4 5;
+    animation: flow 0.9s linear infinite;
+  }
+  .animate-node-pop {
+    animation: node-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-typing-dot {
+    animation: typing-dot 1.2s ease-in-out infinite;
   }
 }
 
