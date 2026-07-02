@@ -35,6 +35,14 @@ export interface NodeDeps {
   };
   /** Monotonic clock (ms). Allows tests to inject a fixed clock. */
   readonly now: () => number;
+  /** Agent-run repository — used by log-step / finalize nodes. */
+  readonly agentRuns?: import("./ports/agent-run-repository.port").IAgentRunRepository;
+  /** Billing gateway — used by reserve-credit / finalize-usage nodes. */
+  readonly billing?: import("./ports/billing-gateway.port").IBillingGateway;
+  /** Market-data gateway — used by data-fetching subgraph nodes. */
+  readonly marketData?: import("./ports/market-data-gateway.port").IMarketDataGateway;
+  /** Portfolio gateway — used by portfolio-impact subgraph nodes. */
+  readonly portfolio?: import("./ports/portfolio-gateway.port").IPortfolioGateway;
 }
 
 /** A single graph node. Returns a partial state merged into the run. */
