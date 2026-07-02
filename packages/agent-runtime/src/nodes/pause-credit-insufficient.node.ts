@@ -11,12 +11,12 @@
  * dispatching further nodes; resume comes from a fresh enqueue.
  */
 import { NodeExecutionFailedError } from "../domain/errors";
-import type { NodeDefinition, NodeDeps } from "../domain/graph";
+import type { NodeDeps } from "../domain/langgraph-node";
 import type { AgentRunState } from "../domain/state";
 
-export const pauseCreditInsufficientNode: NodeDefinition<AgentRunState> = {
+export const pauseCreditInsufficientNode = {
   name: "pause-credit-insufficient",
-  async run(state, deps: NodeDeps) {
+  async run(state: AgentRunState, deps: NodeDeps): Promise<Partial<AgentRunState>> {
     const repo = deps.agentRuns;
     if (!repo) {
       throw new NodeExecutionFailedError("pause-credit-insufficient", "agentRuns dep missing");

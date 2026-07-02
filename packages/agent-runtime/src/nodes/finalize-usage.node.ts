@@ -8,18 +8,17 @@
  * is stamped for telemetry.
  */
 import { NodeExecutionFailedError } from "../domain/errors";
-import type { NodeDefinition, NodeDeps } from "../domain/graph";
+import type { NodeDeps } from "../domain/langgraph-node";
 import type { AgentRunState } from "../domain/state";
 
-export const finalizeUsageNode: NodeDefinition<AgentRunState> = {
+export const finalizeUsageNode = {
   name: "finalize-usage",
   /**
    * Idempotent: a previous finalize set `state.budget.finalCost` and
    * cleared the reservationId — a second invocation becomes a no-op
    * so resume safety is preserved.
    */
-  idempotent: true,
-  async run(state, deps: NodeDeps) {
+  async run(state: AgentRunState, deps: NodeDeps): Promise<Partial<AgentRunState>> {
     const billing = deps.billing;
     if (!billing) {
       throw new NodeExecutionFailedError("finalize-usage", "billing gateway missing from deps");
@@ -27,11 +26,14 @@ export const finalizeUsageNode: NodeDefinition<AgentRunState> = {
     const reservationId = state.budget?.reservationId;
     if (!reservationId) {
       // Already finalized (or no run reservation exists). Skip silently.
+      // Reaching this node means the run reached its terminal step —
+      // flip status to `completed` regardless of whether the reservation
+      // was already closed.
       deps.logger.info("finalize-usage skipped — no active reservation", {
         runId: state.runId,
         existingFinalCost: state.budget?.finalCost ?? null,
       });
-      return {};
+      return { status: "completed" };
     }
     const finalCost = state.usage?.costUsd ?? state.budget?.estimatedCost ?? "0";
     const result = await billing.finalizeUsage({
@@ -50,6 +52,7 @@ export const finalizeUsageNode: NodeDefinition<AgentRunState> = {
       finalCost,
     });
     return {
+      status: "completed",
       budget: {
         estimatedCost: state.budget?.estimatedCost ?? finalCost,
         reservedCost: state.budget?.reservedCost,

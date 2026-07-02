@@ -12,26 +12,28 @@
  * and the worker can transition the run to `paused`.
  */
 import { NodeExecutionFailedError } from "../domain/errors";
-import type { NodeDefinition, NodeDeps } from "../domain/graph";
+import type { NodeDeps } from "../domain/langgraph-node";
 import type { AgentRunState } from "../domain/state";
 
 const DEFAULT_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 
-export const reserveCreditNode: NodeDefinition<AgentRunState> = {
+/** Idempotent billing-reservation node. */
+export const reserveCreditNode = {
   name: "reserve-credit",
-  /**
-   * Idempotent: if a prior invocation already produced a reservationId
-   * the node skips the gateway call — important for resume.
-   */
-  idempotent: true,
-  async run(state, deps: NodeDeps) {
+  async run(state: AgentRunState, deps: NodeDeps): Promise<Partial<AgentRunState>> {
     const billing = deps.billing;
     if (!billing) {
-      throw new NodeExecutionFailedError("reserve-credit", "billing gateway missing from deps");
+      throw new NodeExecutionFailedError(
+        "reserve-credit",
+        "billing gateway missing from deps",
+      );
     }
     const estimated = state.budget?.estimatedCost;
     if (!estimated) {
-      throw new NodeExecutionFailedError("reserve-credit", "state.budget.estimatedCost missing");
+      throw new NodeExecutionFailedError(
+        "reserve-credit",
+        "state.budget.estimatedCost missing",
+      );
     }
     // Resume-skip: a previous attempt already locked the credit.
     const existingReservationId = state.budget?.reservationId;

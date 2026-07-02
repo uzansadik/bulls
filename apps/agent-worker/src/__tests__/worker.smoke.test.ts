@@ -129,6 +129,10 @@ const initialState = {
   messages: [],
   scratchpad: { symbols: ["AAPL"] } as Record<string, unknown>,
   toolInvocations: [],
+  // Subgraph entry nodes (reserve-credit) read `state.budget.estimatedCost`
+  // as a precondition; production callers estimate cost before enqueueing.
+  // The smoke test uses a flat stub.
+  budget: { estimatedCost: "0.05" },
 };
 
 describe("apps/agent-worker smoke", () => {
