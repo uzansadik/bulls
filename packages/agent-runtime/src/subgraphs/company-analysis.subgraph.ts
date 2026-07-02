@@ -24,7 +24,7 @@ import { defineNode } from "../domain/nodes";
  * report writer) render from there.
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step.node";
+import { logStep } from "../nodes/log-step-node";
 
 /** Subgraph-specific state extension. */
 export interface CompanyAnalysisScratchpad {

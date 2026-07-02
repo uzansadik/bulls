@@ -19,7 +19,7 @@ import { defineNode } from "../domain/nodes";
  * weekly digest, notification dispatcher).
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step.node";
+import { logStep } from "../nodes/log-step-node";
 
 /** A single news headline captured from the provider. */
 export interface NewsHeadline {

@@ -18,7 +18,7 @@ import { defineNode } from "../domain/nodes";
  * the analysis chain.
  */
 import type { AgentRunState } from "../domain/state";
-import { logStep } from "../nodes/log-step.node";
+import { logStep } from "../nodes/log-step-node";
 
 /** Subgraph-specific state extension. */
 export interface PortfolioReviewScratchpad {
