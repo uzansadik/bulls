@@ -16,11 +16,15 @@
  *
  *   AgentRuntimeServices.runGraph + BullMQ "agent-run" handler
  */
-import type { AgentRuntimeDeps, AgentRuntimeServices, LoggerLike } from "@openbulls/agent-runtime";
+import type {
+  CompiledGraphBundle,
+  CompiledGraphDeps,
+  LoggerLike,
+} from "@openbulls/agent-runtime";
 import {
-  GraphRegistry,
-  createAgentRuntimeServices,
-  registerDefaultGraphs,
+  createCompiledGraphBundle,
+  createPostgresSaver,
+  defaultGraphFactories,
 } from "@openbulls/agent-runtime";
 import type { BillingServices } from "@openbulls/billing";
 import type { ServerEnv } from "@openbulls/config";
@@ -49,7 +53,7 @@ export interface ProcessMainInput {
 }
 
 export interface ProcessMainHandle {
-  readonly services: AgentRuntimeServices;
+  readonly bundle: CompiledGraphBundle;
   readonly heartbeat: { stop(): void };
   /** Close the BullMQ worker + DB pool. Idempotent. */
   close(): Promise<void>;
@@ -77,12 +81,19 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
   const loggerLike = toLoggerLike(input.logger);
 
   const repos = createRepositories(db);
-  const registry = registerDefaultGraphs(new GraphRegistry());
 
-  const runtimeDeps: AgentRuntimeDeps = {
-    graphRegistry: registry,
+  // PostgresSaver is the only persistence path now — DrizzleCheckpointerSaver
+  // is gone, replaced by the LangGraph-native adapter that reads/writes
+  // `checkpoints` / `checkpoint_blobs` / `checkpoint_writes` tables.
+  const connectionString =
+    (input.env as unknown as { AGENT_DB_URL?: string }).AGENT_DB_URL ??
+    (input.env as unknown as { DATABASE_URL?: string }).DATABASE_URL ??
+    "";
+  const checkpointer = await createPostgresSaver({ connectionString });
+
+  const runtimeDeps: CompiledGraphDeps = {
+    checkpointer,
     agentRuns: repos.agentRuns,
-    checkpointer: undefined as never, // composed below
     billing: createBillingAdapter(input.billing),
     marketData: createMarketDataAdapter(input.marketData, loggerLike),
     portfolio: createPortfolioAdapter(input.portfolio, loggerLike),
@@ -91,25 +102,25 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
     now: () => Date.now(),
   };
 
-  // Wire the checkpointer against the same agent-run repo so
-  // `loadLatestSnapshot` reads through the same DB handle.
-  const services = createAgentRuntimeServices({
-    ...runtimeDeps,
-    checkpointer: new (await import("@openbulls/agent-runtime")).DrizzleCheckpointerSaver(
-      repos.agentRuns,
-    ),
+  const bundle = createCompiledGraphBundle({
+    factories: defaultGraphFactories,
+    deps: runtimeDeps,
   });
 
-  await input.consumer.process("agent-run", makeAgentRunHandler({ services, logger: loggerLike }));
+  await input.consumer.process(
+    "agent-run",
+    makeAgentRunHandler({ bundle, logger: loggerLike }),
+  );
   await input.consumer.start();
 
   const heartbeat = startWorkerHeartbeat(input.logger ?? pinoLogger, input.env);
 
   return {
-    services,
+    bundle,
     heartbeat,
     async close(): Promise<void> {
       heartbeat.stop();
+      await bundle.close();
       await input.consumer.stop().catch((err: unknown) => {
         input.logger?.error({ err: String(err) }, "agent-worker: consumer.stop failed");
       });

@@ -116,7 +116,7 @@ async function main(): Promise<void> {
   pinoLogger.info(
     {
       queue: env.WORKER_QUEUE_NAME,
-      graphs: handle.services.graphRegistry.list().map((g) => g as string),
+      graphs: Object.keys(handle.bundle.graphs),
     },
     "agent-worker: ready",
   );
