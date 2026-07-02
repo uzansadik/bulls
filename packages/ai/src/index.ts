@@ -82,3 +82,51 @@ export {
 } from "./application/list-available-models.query";
 export type { ResolveModelOptions } from "./application/resolve-model.query";
 export { resolveModel } from "./application/resolve-model.query";
+
+// Application — tool registry + selector
+export type { ToolRegistry } from "./application/tool-registry.service";
+export {
+  buildToolRegistry,
+  createToolRegistry,
+  DynamicStructuredTool,
+} from "./application/tool-registry.service";
+export type { Intent } from "./application/tool-selector.service";
+export {
+  detectIntents,
+  selectToolNames,
+  selectTools,
+} from "./application/tool-selector.service";
+export type { DefaultToolRegistryDeps } from "./application/default-tool-registry.factory";
+export { createDefaultToolRegistry } from "./application/default-tool-registry.factory";
+
+// Infrastructure — tool factories
+export {
+  makeAddTransactionTool,
+  makeGetPortfolioOverviewTool,
+  makeGetPositionsTool,
+  makeCalculatePortfolioHealthTool,
+  makePortfolioTools,
+} from "./infrastructure/tools/portfolio-tools";
+export {
+  makeGetDelayedPriceTool,
+  makeGetPriceHistoryTool,
+  makeGetFxRateTool,
+  makeGetTechnicalIndicatorsTool,
+  makeGetFinancialRatiosTool,
+  makeSearchMarketNewsTool,
+  makeMarketDataTools,
+} from "./infrastructure/tools/market-data-tools";
+export {
+  makeGetFinancialStatementTool,
+  makeGetIncomeStatementTool,
+  makeGetBalanceSheetTool,
+  makeGetCashFlowTool,
+  makeAnalyzeFinancialStatementTool,
+  makeFinancialsTools,
+} from "./infrastructure/tools/financials-tools";
+export {
+  makeCreateScheduledJobTool,
+  makePauseScheduledJobTool,
+  makeListScheduledJobsTool,
+  makeAutomationTools,
+} from "./infrastructure/tools/automation-tools";

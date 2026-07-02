@@ -65,6 +65,9 @@ export type { IPortfolioRepository } from "./domain/ports/portfolio-repository.p
 export type { LoggerLike } from "./domain/ports/logger.port";
 export { noopLogger } from "./domain/ports/logger.port";
 
+// ── Application: deps ─────────────────────────────────────────────
+export type { PortfolioDeps } from "./application/portfolio-deps";
+
 // ── Domain: fx-rate (minimal shape used by services) ──────────────
 export type { FxRate } from "./domain/fx-rate";
 
