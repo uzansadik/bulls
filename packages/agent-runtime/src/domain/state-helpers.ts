@@ -5,10 +5,8 @@
  * Three concerns:
  *   1. `agentRunStateToAnnotation()` — feed a freshly-built
  *      `AgentRunState` into `graph.invoke()` as the initial payload.
- *      Date strings + optional fields must match the annotation's shape.
  *   2. `annotationStateToAgentRunState()` — turn whatever LangGraph
- *      yielded back into the canonical `AgentRunState`. Tolerates
- *      `undefined` for optional keys.
+ *      yielded back into the canonical `AgentRunState`.
  *   3. `parseAgentRunState` (already in `state.ts`) — round-trip
  *      validation against the zod schema, used by tests + checkpointer.
  *
@@ -16,14 +14,19 @@
  * already handles merging when a partial update is returned from a
  * node, so this layer is only for *initial state* and *result
  * extraction*.
+ *
+ * The helpers take `Record<string, unknown>` deliberately — the
+ * precise LangGraph `StateType<...>` is a private derived type and
+ * not ergonomic to import into callers. We destructure by key.
  */
 import type { AgentRunState, AgentRunStatus, Budget, UsageAggregate } from "./state";
-import type { AgentRunStateValue } from "./langgraph-annotation";
+
+type AnnotationValueShape = Record<string, unknown>;
 
 /** Initial payload for `graph.invoke()` or `graph.stream()`. */
 export function agentRunStateToAnnotation(
   state: AgentRunState,
-): Partial<AgentRunStateValue> {
+): AnnotationValueShape {
   return {
     runId: state.runId,
     threadId: state.threadId,
@@ -45,25 +48,24 @@ export function agentRunStateToAnnotation(
 
 /** Convert a LangGraph state value back into AgentRunState. */
 export function annotationStateToAgentRunState(
-  value: AgentRunStateValue,
+  value: AnnotationValueShape,
 ): AgentRunState {
+  const v = value as Record<string, unknown>;
   return {
-    runId: value.runId,
-    threadId: value.threadId,
-    userId: value.userId,
-    graphKey: value.graphKey,
-    status: (value.status ?? "completed") as AgentRunStatus,
-    startedAt: value.startedAt ?? new Date(0).toISOString(),
-    messages: value.messages ?? [],
-    scratchpad: value.scratchpad ?? {},
-    toolInvocations: value.toolInvocations ?? [],
-    ...(value.currentNode !== undefined ? { currentNode: value.currentNode } : {}),
-    ...(value.nextNode !== undefined ? { nextNode: value.nextNode } : {}),
-    ...(value.finishedAt !== undefined
-      ? { finishedAt: value.finishedAt }
-      : {}),
-    ...(value.usage !== undefined ? { usage: value.usage } : {}),
-    ...(value.budget !== undefined ? { budget: value.budget } : {}),
-    ...(value.error !== undefined ? { error: value.error } : {}),
+    runId: String(v.runId ?? ""),
+    threadId: String(v.threadId ?? ""),
+    userId: String(v.userId ?? ""),
+    graphKey: String(v.graphKey ?? ""),
+    status: (v.status ?? "completed") as AgentRunStatus,
+    startedAt: String(v.startedAt ?? new Date(0).toISOString()),
+    messages: (Array.isArray(v.messages) ? v.messages : []) as AgentRunState["messages"],
+    scratchpad: (v.scratchpad && typeof v.scratchpad === "object" ? v.scratchpad : {}) as Record<string, unknown>,
+    toolInvocations: (Array.isArray(v.toolInvocations) ? v.toolInvocations : []) as AgentRunState["toolInvocations"],
+    ...(v.currentNode !== undefined ? { currentNode: String(v.currentNode) } : {}),
+    ...(v.nextNode !== undefined ? { nextNode: String(v.nextNode) } : {}),
+    ...(v.finishedAt !== undefined ? { finishedAt: String(v.finishedAt) } : {}),
+    ...(v.usage !== undefined ? { usage: v.usage as UsageAggregate } : {}),
+    ...(v.budget !== undefined ? { budget: v.budget as Budget } : {}),
+    ...(v.error !== undefined ? { error: String(v.error) } : {}),
   };
 }
