@@ -1,26 +1,26 @@
 /**
- * @openbulls/agent-runtime — register-default-graphs helper.
+ * @openbulls/agent-runtime — default subgraph factory registry.
  *
- * Wires the three production subgraphs onto a registry:
- *   - company-analysis  (multi-branch research)
- *   - portfolio-review  (risk + recommendations)
- *   - market-news       (dedupe + cluster digest)
+ * The `defaultGraphFactories` map keys each production subgraph
+ * (`company-analysis`, `portfolio-review`, `market-news`) to its
+ * `CompiledGraphFactory`. `apps/agent-worker` registers this map
+ * with `createCompiledGraphBundle` at boot.
  *
- * The composition root in `apps/agent-worker` calls this once at boot;
- * tests can register a custom subset by importing the graph modules
- * directly.
+ * Tests construct a partial registry with stub deps; production
+ * wires the full set + PostgresSaver.
  */
-import { GraphRegistry } from "../domain/graph";
+import { GraphKey } from "../domain/graph";
+import type { CompiledGraphFactory } from "./graph-factory";
 import { companyAnalysisGraph } from "../subgraphs/company-analysis.subgraph";
 import { marketNewsGraph } from "../subgraphs/market-news.subgraph";
 import { portfolioReviewGraph } from "../subgraphs/portfolio-review.subgraph";
 
-/** Register the production subgraphs onto the provided (or fresh) registry. */
-export function registerDefaultGraphs(
-  registry: GraphRegistry = new GraphRegistry(),
-): GraphRegistry {
-  return registry
-    .register(companyAnalysisGraph)
-    .register(portfolioReviewGraph)
-    .register(marketNewsGraph);
-}
+export const defaultGraphFactories: Record<string, CompiledGraphFactory> = {
+  [GraphKey("company-analysis")]: companyAnalysisGraph,
+  [GraphKey("portfolio-review")]: portfolioReviewGraph,
+  [GraphKey("market-news")]: marketNewsGraph,
+};
+
+export const defaultGraphKeys: ReadonlyArray<string> = Object.keys(
+  defaultGraphFactories,
+).sort();
