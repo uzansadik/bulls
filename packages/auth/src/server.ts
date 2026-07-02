@@ -1,6 +1,6 @@
 import { serverEnv } from "@openbulls/config";
 import { db } from "@openbulls/db/client";
-import * as authSchema from "@openbulls/db/schema/auth.schema.ts";
+import * as authSchema from "@openbulls/db/schema/auth.schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { count, eq } from "drizzle-orm";
