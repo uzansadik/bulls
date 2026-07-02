@@ -224,39 +224,39 @@ export const portfolioReviewGraph: CompiledGraphFactory = (deps) => {
 
   const sg = new StateGraph(AgentRunStateAnnotation)
     .addNode("reserve-credit", runReserve)
-    .addNode("log-step:reserve-credit", log("reserve-credit"))
+    .addNode("log-step-reserve-credit", log("reserve-credit"))
     .addNode("load-portfolio", (state) =>
       loadPortfolio(state as AgentRunState, deps),
     )
-    .addNode("log-step:load-portfolio", log("load-portfolio"))
+    .addNode("log-step-load-portfolio", log("load-portfolio"))
     .addNode("calculate-performance", (state) =>
       calculatePerformance(state as AgentRunState, deps),
     )
-    .addNode("log-step:calculate-performance", log("calculate-performance"))
+    .addNode("log-step-calculate-performance", log("calculate-performance"))
     .addNode("risk-flags", (state) => riskFlags(state as AgentRunState))
-    .addNode("log-step:risk-flags", log("risk-flags"))
+    .addNode("log-step-risk-flags", log("risk-flags"))
     .addNode("recommendations", (state) =>
       recommendations(state as AgentRunState),
     )
-    .addNode("log-step:recommendations", log("recommendations"))
+    .addNode("log-step-recommendations", log("recommendations"))
     .addNode("synthesize-portfolio-review", (state) =>
       synthesizeReport(state as AgentRunState, deps),
     )
-    .addNode("log-step:finalize-usage", log("finalize-usage"))
+    .addNode("log-step-finalize-usage", log("finalize-usage"))
     .addNode("finalize-usage", runFinalize)
     .addEdge("__start__", "reserve-credit")
-    .addEdge("reserve-credit", "log-step:reserve-credit")
-    .addEdge("log-step:reserve-credit", "load-portfolio")
-    .addEdge("load-portfolio", "log-step:load-portfolio")
-    .addEdge("log-step:load-portfolio", "calculate-performance")
-    .addEdge("calculate-performance", "log-step:calculate-performance")
-    .addEdge("log-step:calculate-performance", "risk-flags")
-    .addEdge("risk-flags", "log-step:risk-flags")
-    .addEdge("log-step:risk-flags", "recommendations")
-    .addEdge("recommendations", "log-step:recommendations")
-    .addEdge("log-step:recommendations", "synthesize-portfolio-review")
-    .addEdge("synthesize-portfolio-review", "log-step:finalize-usage")
-    .addEdge("log-step:finalize-usage", "finalize-usage")
+    .addEdge("reserve-credit", "log-step-reserve-credit")
+    .addEdge("log-step-reserve-credit", "load-portfolio")
+    .addEdge("load-portfolio", "log-step-load-portfolio")
+    .addEdge("log-step-load-portfolio", "calculate-performance")
+    .addEdge("calculate-performance", "log-step-calculate-performance")
+    .addEdge("log-step-calculate-performance", "risk-flags")
+    .addEdge("risk-flags", "log-step-risk-flags")
+    .addEdge("log-step-risk-flags", "recommendations")
+    .addEdge("recommendations", "log-step-recommendations")
+    .addEdge("log-step-recommendations", "synthesize-portfolio-review")
+    .addEdge("synthesize-portfolio-review", "log-step-finalize-usage")
+    .addEdge("log-step-finalize-usage", "finalize-usage")
     .addEdge("finalize-usage", "__end__");
 
   return sg.compile({ checkpointer: deps.checkpointer }) as unknown as ReturnType<

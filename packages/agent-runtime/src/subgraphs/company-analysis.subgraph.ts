@@ -266,7 +266,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
       reserveCreditNode.run(state as AgentRunState, deps as CompiledGraphDeps),
     )
     .addNode(
-      "log-step:reserve-credit",
+      "l_reserve_credit",
       (state) =>
         logStep({ stepKey: "reserve-credit" }).run(
           state as AgentRunState,
@@ -275,7 +275,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
     )
     .addNode("load-company", (state) => loadCompany(state as AgentRunState, deps))
     .addNode(
-      "log-step:load-company",
+      "l_load_company",
       (state) =>
         logStep({ stepKey: "load-company" }).run(
           state as AgentRunState,
@@ -293,7 +293,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
       portfolioImpact(state as AgentRunState, deps),
     )
     .addNode(
-      "log-step:financial",
+      "l_financial",
       (state) =>
         logStep({ stepKey: "financial-statements" }).run(
           state as AgentRunState,
@@ -301,7 +301,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
         ),
     )
     .addNode(
-      "log-step:technical",
+      "l_technical",
       (state) =>
         logStep({ stepKey: "technical-analysis" }).run(
           state as AgentRunState,
@@ -309,7 +309,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
         ),
     )
     .addNode(
-      "log-step:news",
+      "l_news",
       (state) =>
         logStep({ stepKey: "market-news" }).run(
           state as AgentRunState,
@@ -317,7 +317,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
         ),
     )
     .addNode(
-      "log-step:portfolio-impact",
+      "l_portfolio_impact",
       (state) =>
         logStep({ stepKey: "portfolio-impact" }).run(
           state as AgentRunState,
@@ -328,7 +328,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
       synthesizeReport(state as AgentRunState, deps),
     )
     .addNode(
-      "log-step:finalize-usage",
+      "l_finalize_usage",
       (state) =>
         logStep({ stepKey: "finalize-usage" }).run(
           state as AgentRunState,
@@ -339,25 +339,25 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
       finalizeUsageNode.run(state as AgentRunState, deps as CompiledGraphDeps),
     )
     .addEdge("__start__", "reserve-credit")
-    .addEdge("reserve-credit", "log-step:reserve-credit")
-    .addEdge("log-step:reserve-credit", "load-company")
-    .addEdge("load-company", "log-step:load-company")
-    .addConditionalEdges("log-step:load-company", parallelBranches, [
+    .addEdge("reserve-credit", "l_reserve_credit")
+    .addEdge("l_reserve_credit", "load-company")
+    .addEdge("load-company", "l_load_company")
+    .addConditionalEdges("l_load_company", parallelBranches, [
       "financial-statements",
       "technical-analysis",
       "market-news",
       "portfolio-impact",
     ])
-    .addEdge("financial-statements", "log-step:financial")
-    .addEdge("technical-analysis", "log-step:technical")
-    .addEdge("market-news", "log-step:news")
-    .addEdge("portfolio-impact", "log-step:portfolio-impact")
-    .addEdge("log-step:financial", "synthesize-company-analysis")
-    .addEdge("log-step:technical", "synthesize-company-analysis")
-    .addEdge("log-step:news", "synthesize-company-analysis")
-    .addEdge("log-step:portfolio-impact", "synthesize-company-analysis")
-    .addEdge("synthesize-company-analysis", "log-step:finalize-usage")
-    .addEdge("log-step:finalize-usage", "finalize-usage")
+    .addEdge("financial-statements", "l_financial")
+    .addEdge("technical-analysis", "l_technical")
+    .addEdge("market-news", "l_news")
+    .addEdge("portfolio-impact", "l_portfolio_impact")
+    .addEdge("l_financial", "synthesize-company-analysis")
+    .addEdge("l_technical", "synthesize-company-analysis")
+    .addEdge("l_news", "synthesize-company-analysis")
+    .addEdge("l_portfolio_impact", "synthesize-company-analysis")
+    .addEdge("synthesize-company-analysis", "l_finalize_usage")
+    .addEdge("l_finalize_usage", "finalize-usage")
     .addEdge("finalize-usage", "__end__");
 
   // Cast the precise LangGraph `CompiledStateGraph<S, U, ..., TStreamTransformers>`
