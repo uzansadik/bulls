@@ -24,11 +24,32 @@ export interface AddTransactionInput {
   notes?: string;
 }
 
+export interface ListTransactionsQuery {
+  portfolioId: string;
+  from?: Date;
+  to?: Date;
+  side?: PortfolioTransaction["side"];
+  limit?: number;
+}
+
+export interface UpsertHoldingInput {
+  portfolioId: string;
+  assetSymbol: string;
+  quantity: string;
+  avgCost: string;
+  realizedPnl: string;
+}
+
 export interface IPortfolioRepository {
   create(input: CreatePortfolioInput): Promise<Portfolio>;
   listByUser(userId: string): Promise<Portfolio[]>;
   getById(id: string): Promise<Portfolio | null>;
+  archive(id: string): Promise<void>;
   recordTransaction(input: AddTransactionInput): Promise<PortfolioTransaction>;
+  insertTransaction(input: AddTransactionInput): Promise<PortfolioTransaction>;
+  upsertHolding(input: UpsertHoldingInput): Promise<void>;
+  listTransactions(query: ListTransactionsQuery): Promise<PortfolioTransaction[]>;
+  deleteTransaction(id: string): Promise<void>;
   recomputeHoldings(portfolioId: string): Promise<PortfolioHolding[]>;
   getHoldings(portfolioId: string): Promise<PortfolioHolding[]>;
 }

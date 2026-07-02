@@ -69,6 +69,8 @@ export const technicalIndicatorTypeEnum = pgEnum("technical_indicator_type", [
   "obv",
   "fibonacci_retracement",
 ]);
+export type TechnicalIndicatorType = (typeof technicalIndicatorTypeEnum.enumValues)[number];
+export type StatementType = (typeof statementTypeEnum.enumValues)[number];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Portfolio
@@ -257,6 +259,7 @@ export const integrationProviderEnum = pgEnum("integration_provider", [
 
 export type AgentRunStatus = (typeof agentRunStatusEnum.enumValues)[number];
 export type StepStatus = (typeof stepStatusEnum.enumValues)[number];
+export type ToolCallStatus = (typeof toolCallStatusEnum.enumValues)[number];
 export type ReservationStatus = (typeof reservationStatusEnum.enumValues)[number];
 export type CreditTxKind = (typeof creditTxKindEnum.enumValues)[number];
 export type SubscriptionStatus = (typeof subscriptionStatusEnum.enumValues)[number];
@@ -267,3 +270,7 @@ export type MarketProvider = (typeof marketProviderEnum.enumValues)[number];
 export type CandleInterval = (typeof candleIntervalEnum.enumValues)[number];
 export type ChatRole = (typeof chatRoleEnum.enumValues)[number];
 export type NotificationStatus = (typeof notificationStatusEnum.enumValues)[number];
+export type JobExecutorType = (typeof jobExecutorTypeEnum.enumValues)[number];
+export type ScheduledJobStatus = (typeof scheduledJobStatusEnum.enumValues)[number];
+export type ExecutionStatus = (typeof executionStatusEnum.enumValues)[number];
+export type QueueItemStatus = (typeof queueItemStatusEnum.enumValues)[number];
