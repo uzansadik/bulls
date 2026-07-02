@@ -32,13 +32,18 @@
  */
 import { StateGraph } from "@langchain/langgraph";
 
-import { AgentRunStateAnnotation } from "../domain/langgraph-annotation";
 import { ToolCallFailedError } from "../domain/errors";
+import { AgentRunStateAnnotation } from "../domain/langgraph-annotation";
+import type { AgentRunState } from "../domain/state";
 import type { CompiledGraphDeps, CompiledGraphFactory } from "../infrastructure/graph-factory";
+import {
+  DEFAULT_FINANCE_SYSTEM_PROMPT,
+  DEFAULT_MODEL_KEY,
+  callModelNode,
+} from "../nodes/call-model.node.js";
 import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
 import { logStep } from "../nodes/log-step-node.js";
 import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
-import type { AgentRunState } from "../domain/state";
 
 // ─── Subgraph-specific state ────────────────────────────────────────────────
 
@@ -186,28 +191,38 @@ const synthesizeReport = async (
   deps: CompiledGraphDeps,
 ): Promise<Partial<AgentRunState>> => {
   const scratch = state.scratchpad as unknown as PortfolioReviewScratchpad;
-  const parts: string[] = [];
-  parts.push(`# Portfolio Review: ${scratch.portfolioId}`);
-  parts.push("");
-  if (scratch.riskFlags) {
-    parts.push("## Risk Flags");
-    for (const line of scratch.riskFlags.insights) parts.push(`- ${line}`);
-    parts.push("");
-  }
-  if (scratch.recommendations) {
-    parts.push("## Recommendations");
-    for (const r of scratch.recommendations) {
-      parts.push(`### ${r.title}\n${r.rationale}\n`);
-    }
-  }
-  const report = parts.join("\n");
-  deps.logger.info("portfolio-review: report synthesized", {
-    runId: state.runId,
-    portfolioId: scratch.portfolioId,
-    length: report.length,
+  const userPrompt = [
+    `# Portfolio: ${scratch.portfolioId}`,
+    scratch.from ? `# From: ${scratch.from}` : "",
+    scratch.to ? `# To: ${scratch.to}` : "",
+    "",
+    "## Portfolio Overview",
+    scratch.overview ? JSON.stringify(scratch.overview) : "(no overview)",
+    "",
+    "## Performance Window",
+    scratch.performance ? JSON.stringify(scratch.performance) : "(no performance)",
+    "",
+    "## Risk Flags",
+    scratch.riskFlags
+      ? `concentration: ${JSON.stringify(scratch.riskFlags.concentration)}\ndrawdown: ${(scratch.riskFlags.drawdownPct * 100).toFixed(1)}%\ninsights:\n${scratch.riskFlags.insights.map((i) => `- ${i}`).join("\n")}`
+      : "(none)",
+    "",
+    "## Recommendations",
+    scratch.recommendations
+      ? scratch.recommendations.map((r) => `### ${r.title}\n${r.rationale}`).join("\n\n")
+      : "(none)",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const update = await callModelNode(state, deps, {
+    modelKey: DEFAULT_MODEL_KEY,
+    systemPrompt: `${DEFAULT_FINANCE_SYSTEM_PROMPT} Focus the report on the portfolio under review; structure the markdown around the Risk Flags and Recommendations sections above.`,
+    userPrompt,
+    outputField: "report",
   });
   return {
-    scratchpad: { ...(state.scratchpad as Record<string, unknown>), report },
+    ...update,
     currentNode: "synthesize-portfolio-review",
   };
 };
@@ -225,19 +240,13 @@ export const portfolioReviewGraph: CompiledGraphFactory = (deps) => {
   const sg = new StateGraph(AgentRunStateAnnotation)
     .addNode("reserve-credit", runReserve)
     .addNode("log-step-reserve-credit", log("reserve-credit"))
-    .addNode("load-portfolio", (state) =>
-      loadPortfolio(state as AgentRunState, deps),
-    )
+    .addNode("load-portfolio", (state) => loadPortfolio(state as AgentRunState, deps))
     .addNode("log-step-load-portfolio", log("load-portfolio"))
-    .addNode("calculate-performance", (state) =>
-      calculatePerformance(state as AgentRunState, deps),
-    )
+    .addNode("calculate-performance", (state) => calculatePerformance(state as AgentRunState, deps))
     .addNode("log-step-calculate-performance", log("calculate-performance"))
     .addNode("risk-flags", (state) => riskFlags(state as AgentRunState))
     .addNode("log-step-risk-flags", log("risk-flags"))
-    .addNode("recommendations", (state) =>
-      recommendations(state as AgentRunState),
-    )
+    .addNode("recommendations", (state) => recommendations(state as AgentRunState))
     .addNode("log-step-recommendations", log("recommendations"))
     .addNode("synthesize-portfolio-review", (state) =>
       synthesizeReport(state as AgentRunState, deps),
@@ -259,7 +268,7 @@ export const portfolioReviewGraph: CompiledGraphFactory = (deps) => {
     .addEdge("log-step-finalize-usage", "finalize-usage")
     .addEdge("finalize-usage", "__end__");
 
-  return sg.compile({ checkpointer: deps.checkpointer }) as unknown as ReturnType<
-    CompiledGraphFactory
-  >;
+  return sg.compile({
+    checkpointer: deps.checkpointer,
+  }) as unknown as ReturnType<CompiledGraphFactory>;
 };

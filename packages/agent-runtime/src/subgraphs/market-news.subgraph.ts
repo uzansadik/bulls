@@ -21,13 +21,18 @@
  */
 import { StateGraph } from "@langchain/langgraph";
 
-import { AgentRunStateAnnotation } from "../domain/langgraph-annotation";
 import { ToolCallFailedError } from "../domain/errors";
+import { AgentRunStateAnnotation } from "../domain/langgraph-annotation";
+import type { AgentRunState } from "../domain/state";
 import type { CompiledGraphDeps, CompiledGraphFactory } from "../infrastructure/graph-factory";
+import {
+  DEFAULT_FINANCE_SYSTEM_PROMPT,
+  DEFAULT_MODEL_KEY,
+  callModelNode,
+} from "../nodes/call-model.node.js";
 import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
 import { logStep } from "../nodes/log-step-node.js";
 import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
-import type { AgentRunState } from "../domain/state";
 
 // ─── Subgraph-specific state ────────────────────────────────────────────────
 
@@ -162,32 +167,38 @@ const summarize = async (
       if (!top.find((t) => t.headline === item.headline)) top.push(item);
     }
   }
-  const parts: string[] = [];
-  parts.push(`# Market News: ${symbols.join(", ")}`);
-  parts.push("");
-  parts.push(
+  const userPrompt = [
+    `# Symbols: ${symbols.join(", ")}`,
+    scratch.from ? `# From: ${scratch.from}` : "",
+    scratch.to ? `# To: ${scratch.to}` : "",
+    "",
     `Captured ${scratch.rawItems?.length ?? 0} items across ${groups.length} topic clusters.`,
-  );
-  parts.push("");
-  parts.push("## Top Headlines");
-  for (const item of top) {
-    const ts = item.publishedAt ? ` _(${item.publishedAt})_` : "";
-    parts.push(`- **${item.symbol}**${ts}: ${item.headline}`);
-  }
-  parts.push("");
-  parts.push("## Topic Clusters");
-  for (const g of groups.slice(0, 8)) {
-    parts.push(`- ${g.keyword} (${g.weight} mentions)`);
-  }
-  const summary = parts.join("\n");
-  deps.logger.info("market-news: summary assembled", {
-    runId: state.runId,
-    groups: groups.length,
-    top: top.length,
-    length: summary.length,
+    "",
+    "## Top Headlines",
+    top
+      .map((item) => {
+        const ts = item.publishedAt ? ` _(${item.publishedAt})_` : "";
+        return `- **${item.symbol}**${ts}: ${item.headline}`;
+      })
+      .join("\n"),
+    "",
+    "## Topic Clusters",
+    groups
+      .slice(0, 8)
+      .map((g) => `- ${g.keyword} (${g.weight} mentions)`)
+      .join("\n"),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const update = await callModelNode(state, deps, {
+    modelKey: DEFAULT_MODEL_KEY,
+    systemPrompt: `${DEFAULT_FINANCE_SYSTEM_PROMPT} Summarise the headlines into a short market-news brief. Keep it scannable, call out the most-mentioned topics, and flag anything that could move prices in the next session.`,
+    userPrompt,
+    outputField: "summary",
   });
   return {
-    scratchpad: { ...(state.scratchpad as Record<string, unknown>), summary },
+    ...update,
     currentNode: "summarize-news",
   };
 };
@@ -229,7 +240,7 @@ export const marketNewsGraph: CompiledGraphFactory = (deps) => {
     .addEdge("log-step-finalize-usage", "finalize-usage")
     .addEdge("finalize-usage", "__end__");
 
-  return sg.compile({ checkpointer: deps.checkpointer }) as unknown as ReturnType<
-    CompiledGraphFactory
-  >;
+  return sg.compile({
+    checkpointer: deps.checkpointer,
+  }) as unknown as ReturnType<CompiledGraphFactory>;
 };

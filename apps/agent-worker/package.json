@@ -14,8 +14,10 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@langchain/core": "latest",
     "@langchain/langgraph": "latest",
     "@openbulls/agent-runtime": "workspace:*",
+    "@openbulls/ai": "workspace:*",
     "@openbulls/billing": "workspace:*",
     "@openbulls/config": "workspace:*",
     "@openbulls/db": "workspace:*",

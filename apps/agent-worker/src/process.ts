@@ -16,11 +16,7 @@
  *
  *   CompiledGraphBundle + BullMQ "agent-run" handler
  */
-import type {
-  CompiledGraphBundle,
-  CompiledGraphDeps,
-  LoggerLike,
-} from "@openbulls/agent-runtime";
+import type { CompiledGraphBundle, CompiledGraphDeps, LoggerLike } from "@openbulls/agent-runtime";
 import {
   createCompiledGraphBundle,
   createPostgresSaver,
@@ -38,6 +34,7 @@ import type { PortfolioServices } from "@openbulls/portfolio";
 import { createBillingAdapter } from "./infrastructure/billing-adapter";
 import { createJobsAdapter } from "./infrastructure/jobs-adapter";
 import { createMarketDataAdapter } from "./infrastructure/market-data-adapter";
+import { createModelAdapter } from "./infrastructure/model-adapter";
 import { createPortfolioAdapter } from "./infrastructure/portfolio-adapter";
 import { makeAgentRunHandler } from "./job-handler";
 
@@ -99,6 +96,7 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
     marketData: createMarketDataAdapter(input.marketData, loggerLike),
     portfolio: createPortfolioAdapter(input.portfolio, loggerLike),
     jobs: createJobsAdapter(input.jobs),
+    model: createModelAdapter({ env: input.env, logger: loggerLike }),
     logger: loggerLike,
     now: () => Date.now(),
   };
@@ -108,10 +106,7 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
     deps: runtimeDeps,
   });
 
-  await input.consumer.process(
-    "agent-run",
-    makeAgentRunHandler({ bundle, logger: loggerLike }),
-  );
+  await input.consumer.process("agent-run", makeAgentRunHandler({ bundle, logger: loggerLike }));
   await input.consumer.start();
 
   const heartbeat = startWorkerHeartbeat(input.logger ?? pinoLogger, input.env);

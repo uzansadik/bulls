@@ -100,6 +100,12 @@ export type {
   GetHoldingsRequest,
   GetPerformanceRequest,
 } from "./domain/ports/portfolio-gateway.port";
+export type {
+  IModelGateway,
+  ModelInvocationRequest,
+  ModelInvocationResult,
+  ModelStreamChunk,
+} from "./domain/ports/model-gateway.port";
 
 // Infrastructure — composition + factories
 export {
@@ -127,6 +133,15 @@ export { reserveCreditNode } from "./nodes/reserve-credit.node.js";
 export { finalizeUsageNode } from "./nodes/finalize-usage.node.js";
 export { pauseCreditInsufficientNode } from "./nodes/pause-credit-insufficient.node.js";
 export { logStep } from "./nodes/log-step-node.js";
+// Synthesis helper — used by every subgraph that needs the model
+// to compose a final answer (CLAUDE.md §10 + §11).
+export {
+  callModelNode,
+  DEFAULT_FINANCE_SYSTEM_PROMPT,
+  DEFAULT_MODEL_KEY,
+  DEFAULT_OUTPUT_FIELD,
+  type CallModelInput,
+} from "./nodes/call-model.node.js";
 
 // Public types
 export type {

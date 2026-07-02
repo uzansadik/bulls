@@ -45,13 +45,18 @@
  */
 import { Send, StateGraph } from "@langchain/langgraph";
 
+import { ToolCallFailedError } from "../domain/errors";
 import { AgentRunStateAnnotation } from "../domain/langgraph-annotation";
+import type { AgentRunState } from "../domain/state";
 import type { CompiledGraphDeps, CompiledGraphFactory } from "../infrastructure/graph-factory";
+import {
+  DEFAULT_FINANCE_SYSTEM_PROMPT,
+  DEFAULT_MODEL_KEY,
+  callModelNode,
+} from "../nodes/call-model.node.js";
 import { finalizeUsageNode } from "../nodes/finalize-usage.node.js";
 import { logStep } from "../nodes/log-step-node.js";
 import { reserveCreditNode } from "../nodes/reserve-credit.node.js";
-import { ToolCallFailedError } from "../domain/errors";
-import type { AgentRunState } from "../domain/state";
 
 // ─── Subgraph-specific scratchpad shape ─────────────────────────────────────
 
@@ -143,10 +148,7 @@ const technicalAnalysis = async (
   if (!md) throw new ToolCallFailedError("market-data", "gateway missing from deps");
   const symbol = (state.scratchpad as { symbol?: string }).symbol;
   if (!symbol) {
-    throw new ToolCallFailedError(
-      "market-data",
-      "scratchpad.symbol missing in technical-analysis",
-    );
+    throw new ToolCallFailedError("market-data", "scratchpad.symbol missing in technical-analysis");
   }
   const candles = await md.getCandles({ symbol, interval: "1d", limit: 200 });
   const insight = `Technical indicators computed from 200 daily candles for ${symbol}; see state.technical.indicators for raw values.`;
@@ -219,32 +221,37 @@ const synthesizeReport = async (
   deps: CompiledGraphDeps,
 ): Promise<Partial<AgentRunState>> => {
   const scratch = state.scratchpad as unknown as CompanyAnalysisScratchpad;
-  const parts: string[] = [];
-  parts.push(`# Company Analysis: ${scratch.symbol}`);
-  parts.push("");
-  if (scratch.quote) {
-    parts.push(`## Quote\n${JSON.stringify(scratch.quote, null, 2)}\n`);
-  }
-  if (scratch.financial?.insight) {
-    parts.push(`## Financial\n${scratch.financial.insight}\n`);
-  }
-  if (scratch.technical?.insight) {
-    parts.push(`## Technical\n${scratch.technical.insight}\n`);
-  }
-  if (scratch.news?.insight) {
-    parts.push(`## News\n${scratch.news.insight}\n`);
-  }
-  if (scratch.portfolioImpact?.impact) {
-    parts.push(`## Portfolio Impact\n${scratch.portfolioImpact.impact}\n`);
-  }
-  const report = parts.join("\n");
-  deps.logger.info("company-analysis: report synthesized", {
-    runId: state.runId,
-    symbol: scratch.symbol,
-    length: report.length,
+  const userPrompt = [
+    `# Symbol: ${scratch.symbol}`,
+    `# Scope: ${scratch.scope}`,
+    scratch.portfolioId ? `# Portfolio: ${scratch.portfolioId}` : "",
+    "",
+    "## Research findings",
+    scratch.quote ? `### Quote\n${JSON.stringify(scratch.quote)}` : "",
+    scratch.financial
+      ? `### Financial\nstatements: ${JSON.stringify(scratch.financial.statements)}\nratios: ${JSON.stringify(scratch.financial.ratios)}\ninsight: ${scratch.financial.insight}`
+      : "",
+    scratch.technical
+      ? `### Technical\ncandles: ${scratch.technical.candles}\nindicators: ${JSON.stringify(scratch.technical.indicators)}\ninsight: ${scratch.technical.insight}`
+      : "",
+    scratch.news
+      ? `### News\nitems: ${JSON.stringify(scratch.news.items)}\ngrouped: ${JSON.stringify(scratch.news.grouped)}\ninsight: ${scratch.news.insight}`
+      : "",
+    scratch.portfolioImpact
+      ? `### Portfolio Impact\nholdings: ${JSON.stringify(scratch.portfolioImpact.holdings)}\nimpact: ${scratch.portfolioImpact.impact}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const update = await callModelNode(state, deps, {
+    modelKey: DEFAULT_MODEL_KEY,
+    systemPrompt: `${DEFAULT_FINANCE_SYSTEM_PROMPT} Focus the report on the company ticker symbol; sections should follow the Research findings above.`,
+    userPrompt,
+    outputField: "report",
   });
   return {
-    scratchpad: { ...(state.scratchpad as Record<string, unknown>), report },
+    ...update,
     currentNode: "synthesize-company-analysis",
   };
 };
@@ -265,75 +272,43 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
     .addNode("reserve-credit", (state) =>
       reserveCreditNode.run(state as AgentRunState, deps as CompiledGraphDeps),
     )
-    .addNode(
-      "l_reserve_credit",
-      (state) =>
-        logStep({ stepKey: "reserve-credit" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_reserve_credit", (state) =>
+      logStep({ stepKey: "reserve-credit" }).run(state as AgentRunState, deps as CompiledGraphDeps),
     )
     .addNode("load-company", (state) => loadCompany(state as AgentRunState, deps))
-    .addNode(
-      "l_load_company",
-      (state) =>
-        logStep({ stepKey: "load-company" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_load_company", (state) =>
+      logStep({ stepKey: "load-company" }).run(state as AgentRunState, deps as CompiledGraphDeps),
     )
-    .addNode("financial-statements", (state) =>
-      financialStatements(state as AgentRunState, deps),
-    )
-    .addNode("technical-analysis", (state) =>
-      technicalAnalysis(state as AgentRunState, deps),
-    )
+    .addNode("financial-statements", (state) => financialStatements(state as AgentRunState, deps))
+    .addNode("technical-analysis", (state) => technicalAnalysis(state as AgentRunState, deps))
     .addNode("market-news", (state) => marketNews(state as AgentRunState, deps))
-    .addNode("portfolio-impact", (state) =>
-      portfolioImpact(state as AgentRunState, deps),
+    .addNode("portfolio-impact", (state) => portfolioImpact(state as AgentRunState, deps))
+    .addNode("l_financial", (state) =>
+      logStep({ stepKey: "financial-statements" }).run(
+        state as AgentRunState,
+        deps as CompiledGraphDeps,
+      ),
     )
-    .addNode(
-      "l_financial",
-      (state) =>
-        logStep({ stepKey: "financial-statements" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_technical", (state) =>
+      logStep({ stepKey: "technical-analysis" }).run(
+        state as AgentRunState,
+        deps as CompiledGraphDeps,
+      ),
     )
-    .addNode(
-      "l_technical",
-      (state) =>
-        logStep({ stepKey: "technical-analysis" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_news", (state) =>
+      logStep({ stepKey: "market-news" }).run(state as AgentRunState, deps as CompiledGraphDeps),
     )
-    .addNode(
-      "l_news",
-      (state) =>
-        logStep({ stepKey: "market-news" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
-    )
-    .addNode(
-      "l_portfolio_impact",
-      (state) =>
-        logStep({ stepKey: "portfolio-impact" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_portfolio_impact", (state) =>
+      logStep({ stepKey: "portfolio-impact" }).run(
+        state as AgentRunState,
+        deps as CompiledGraphDeps,
+      ),
     )
     .addNode("synthesize-company-analysis", (state) =>
       synthesizeReport(state as AgentRunState, deps),
     )
-    .addNode(
-      "l_finalize_usage",
-      (state) =>
-        logStep({ stepKey: "finalize-usage" }).run(
-          state as AgentRunState,
-          deps as CompiledGraphDeps,
-        ),
+    .addNode("l_finalize_usage", (state) =>
+      logStep({ stepKey: "finalize-usage" }).run(state as AgentRunState, deps as CompiledGraphDeps),
     )
     .addNode("finalize-usage", (state) =>
       finalizeUsageNode.run(state as AgentRunState, deps as CompiledGraphDeps),
@@ -363,7 +338,7 @@ export const companyAnalysisGraph: CompiledGraphFactory = (deps) => {
   // Cast the precise LangGraph `CompiledStateGraph<S, U, ..., TStreamTransformers>`
   // generic back to the abstract factory signature — the runtime shape is
   // identical (invoke + stream), only the inferred parameter list differs.
-  return sg.compile({ checkpointer: deps.checkpointer }) as unknown as ReturnType<
-    CompiledGraphFactory
-  >;
+  return sg.compile({
+    checkpointer: deps.checkpointer,
+  }) as unknown as ReturnType<CompiledGraphFactory>;
 };

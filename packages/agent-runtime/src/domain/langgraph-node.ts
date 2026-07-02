@@ -18,6 +18,7 @@ import type { IAgentRunRepository } from "./ports/agent-run-repository.port";
 import type { IBillingGateway } from "./ports/billing-gateway.port";
 import type { IJobsGateway } from "./ports/jobs-gateway.port";
 import type { IMarketDataGateway } from "./ports/market-data-gateway.port";
+import type { IModelGateway } from "./ports/model-gateway.port";
 import type { IPortfolioGateway } from "./ports/portfolio-gateway.port";
 
 /**
@@ -35,6 +36,8 @@ export interface NodeDeps {
   readonly marketData?: IMarketDataGateway;
   readonly portfolio?: IPortfolioGateway;
   readonly jobs?: IJobsGateway;
+  /** Model gateway — required by synthesis nodes. */
+  readonly model?: IModelGateway;
   /** LangGraph checkpointer — handy for self-pause helpers. */
   readonly checkpointer?: BaseCheckpointSaver;
 }

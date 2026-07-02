@@ -16,6 +16,7 @@ import type {
   IBillingGateway,
   IJobsGateway,
   IMarketDataGateway,
+  IModelGateway,
   IPortfolioGateway,
   LoggerLike,
 } from "@openbulls/agent-runtime";
@@ -103,6 +104,19 @@ const okPortfolio: IPortfolioGateway = {
   },
 };
 
+const okModel: IModelGateway = {
+  async invoke() {
+    return {
+      content: "# Stub report\n\nModel adapter was not wired in the smoke test.",
+      usage: { promptTokens: 1, completionTokens: 1, totalTokens: 2 },
+      toolCalls: [],
+    };
+  },
+  async *stream(): AsyncIterable<never> {
+    // empty — synthesize path uses invoke()
+  },
+};
+
 function buildBundle(repo: InMemoryAgentRunRepository) {
   return createCompiledGraphBundle({
     factories: defaultGraphFactories,
@@ -113,6 +127,7 @@ function buildBundle(repo: InMemoryAgentRunRepository) {
       marketData: okMarket,
       portfolio: okPortfolio,
       jobs: okJobs,
+      model: okModel,
       logger: noopLogger,
       now: () => Date.now(),
     },
