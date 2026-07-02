@@ -1,20 +1,20 @@
 /**
  * apps/agent-worker — main loop.
  *
- * Wires the BullMQ consumer to the agent-runtime's `runGraph`
- * service, registers a single handler for the `agent-run` job
- * kind, and starts the heartbeat. Returns the consumer + heartbeat
- * so the caller can shut them down on SIGTERM / SIGINT.
+ * Wires the BullMQ consumer to the agent-runtime's `CompiledGraphBundle`,
+ * registers a single handler for the `agent-run` job kind, and starts
+ * the heartbeat. Returns the consumer + heartbeat so the caller can
+ * shut them down on SIGTERM / SIGINT.
  *
  * Composes:
  *
  *   @openbulls/db            ─┐
  *   @openbulls/billing        │
- *   @openbulls/market-data    ├── adapters ─→ AgentRuntimeServices
+ *   @openbulls/market-data    ├── adapters ─→ CompiledGraphBundle.invoke / .stream
  *   @openbulls/portfolio      │
  *   @openbulls/jobs           ─┘
  *
- *   AgentRuntimeServices.runGraph + BullMQ "agent-run" handler
+ *   CompiledGraphBundle + BullMQ "agent-run" handler
  */
 import type {
   CompiledGraphBundle,
@@ -82,9 +82,10 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
 
   const repos = createRepositories(db);
 
-  // PostgresSaver is the only persistence path now — DrizzleCheckpointerSaver
-  // is gone, replaced by the LangGraph-native adapter that reads/writes
-  // `checkpoints` / `checkpoint_blobs` / `checkpoint_writes` tables.
+  // PostgresSaver is the only persistence path — the LangGraph-native
+  // adapter reads/writes `checkpoints` / `checkpoint_blobs` /
+  // `checkpoint_writes` tables. Replaces the earlier custom
+  // DrizzleCheckpointerSaver that lived in `packages/db`.
   const connectionString =
     (input.env as unknown as { AGENT_DB_URL?: string }).AGENT_DB_URL ??
     (input.env as unknown as { DATABASE_URL?: string }).DATABASE_URL ??

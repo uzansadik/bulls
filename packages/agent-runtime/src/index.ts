@@ -25,6 +25,20 @@ export {
   usageAggregateSchema,
 } from "./domain/state";
 export {
+  AgentRunStateAnnotation,
+  type AgentRunStateValue,
+} from "./domain/langgraph-annotation";
+export {
+  agentRunStateToAnnotation,
+  annotationStateToAgentRunState,
+} from "./domain/state-helpers";
+export {
+  type NodeDeps,
+  type LangGraphNode,
+  withDeps,
+  passthroughNode,
+} from "./domain/langgraph-node";
+export {
   DuplicateGraphError,
   UnknownGraphError,
   CheckpointCorruptError,
@@ -36,20 +50,9 @@ export {
   RunNotResumableError,
   InvalidRunInputError,
 } from "./domain/errors";
-export {
-  GraphRegistry,
-  type GraphDefinition,
-  type GraphKey,
-  type NodeDefinition,
-  type NodeDeps,
-} from "./domain/graph";
-export { defineNode } from "./domain/nodes";
+export { GraphKey } from "./domain/graph";
 
 // Ports
-export type {
-  ICheckpointer,
-  CheckpointRecord,
-} from "./domain/ports/checkpointer.port";
 export type {
   IAgentRunRepository,
   CreateAgentRunInput,
@@ -98,15 +101,23 @@ export type {
   GetPerformanceRequest,
 } from "./domain/ports/portfolio-gateway.port";
 
-// Infrastructure — composition + run helpers
+// Infrastructure — composition + factories
 export {
-  createAgentRuntimeServices,
-  createAgentRuntimeServicesFromEnv,
-  type CreateAgentRuntimeServicesFromEnvDeps,
+  createCompiledGraphBundle,
+  type CompiledGraphBundle,
 } from "./infrastructure/composition";
-export { runGraph, resumeRun, pauseRun } from "./infrastructure/run-graph";
-export { registerDefaultGraphs } from "./infrastructure/register-default-graphs";
-export { DrizzleCheckpointerSaver } from "./infrastructure/checkpointer.saver";
+export type {
+  CompiledGraphDeps,
+  CompiledGraphFactory,
+} from "./infrastructure/graph-factory";
+export {
+  defaultGraphFactories,
+  defaultGraphKeys,
+} from "./infrastructure/register-default-graphs";
+export {
+  createPostgresSaver,
+  type CreatePostgresSaverOptions,
+} from "./infrastructure/postgres-checkpointer";
 
 // Billing guard nodes — agent subgraphs should mount `reserveCreditNode`
 // at the entry and `finalizeUsageNode` at the exit (CLAUDE.md §11).
@@ -119,11 +130,6 @@ export { logStep } from "./nodes/log-step-node.js";
 
 // Public types
 export type {
-  AgentRuntimeDeps,
-  AgentRuntimeServices,
-  RunGraphInput,
-  RunGraphResult,
-  PauseRunInput,
   LoggerLike,
   NowFn,
 } from "./infrastructure/agent-runtime.types";
