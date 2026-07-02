@@ -18,10 +18,18 @@ import type { IPortfolioGateway } from "../domain/ports/portfolio-gateway.port";
 
 /** Logger shape every node receives. */
 export interface LoggerLike {
+  debug: (msg: string, ctx?: Record<string, unknown>) => void;
   info: (msg: string, ctx?: Record<string, unknown>) => void;
   warn: (msg: string, ctx?: Record<string, unknown>) => void;
   error: (msg: string, ctx?: Record<string, unknown>) => void;
 }
+
+export const noopLogger: LoggerLike = {
+  debug: () => undefined,
+  info: () => undefined,
+  warn: () => undefined,
+  error: () => undefined,
+};
 
 /** Wall-clock injected for tests. Returns epoch ms. */
 export type NowFn = () => number;

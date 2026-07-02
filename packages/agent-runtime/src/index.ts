@@ -67,7 +67,11 @@ export type {
   StepStatus,
   ToolCallStatus,
 } from "./domain/ports/agent-run-repository.port";
-export type { IJobsGateway, EnqueueAgentRunInput } from "./domain/ports/jobs-gateway.port";
+export type {
+  IJobsGateway,
+  EnqueueAgentRunInput,
+  EnqueueAgentRunResult,
+} from "./domain/ports/jobs-gateway.port";
 export type {
   IBillingGateway,
   ReserveCreditInput,
@@ -112,6 +116,7 @@ export type {
   LoggerLike,
   NowFn,
 } from "./infrastructure/agent-runtime.types";
+export { noopLogger } from "./infrastructure/agent-runtime.types";
 
 // Subgraphs (so callers can register custom ones)
 export {
