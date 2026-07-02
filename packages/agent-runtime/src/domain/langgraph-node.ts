@@ -19,7 +19,6 @@ import type { IBillingGateway } from "./ports/billing-gateway.port";
 import type { IJobsGateway } from "./ports/jobs-gateway.port";
 import type { IMarketDataGateway } from "./ports/market-data-gateway.port";
 import type { IPortfolioGateway } from "./ports/portfolio-gateway.port";
-import type { AgentRunState } from "./state";
 
 /**
  * Per-node dependencies, captured at compile time.
@@ -48,25 +47,28 @@ export interface NodeDeps {
  * (`CompanyAnalysisState`, `PortfolioReviewState`, etc.) so nodes
  * can read subgraph-specific scratchpad keys with full types.
  */
-export type LangGraphNode<S extends AgentRunState = AgentRunState> = (
-  state: S,
-) => Promise<Partial<S> | undefined | void>;
+export type LangGraphNode<S = unknown> = (state: S) => Promise<unknown>;
 
 /**
  * Adapter — closes a node function over its deps so it conforms to
  * LangGraph's `addNode(name, fn)` signature.
  *
- * The wrapped function returns whatever the inner function returns,
- * so an inner function that throws will bubble up exactly the same
- * way it did in the custom runner — LangGraph will halt, and the
- * checkpointer records the last successful node.
+ * We type the return as `(state: unknown) => Promise<unknown>` so
+ * LangGraph's `addNode` accepts it regardless of the precise
+ * inferred state shape (LangGraph infers its own `StateType<...>`
+ * per-subgraph from the annotation, which is structurally compatible
+ * with the canonical `AgentRunState`).
+ *
+ * The inner function still gets typed state (`S`) — we cast at the
+ * boundary, where LangGraph's narrower inferred type meets our
+ * canonical state.
  */
-export function withDeps<S extends AgentRunState, R extends Partial<S>>(
+export function withDeps<S, R>(
   deps: NodeDeps,
   fn: (state: S, deps: NodeDeps) => Promise<R>,
-): LangGraphNode<S> {
-  return async (state: S) => {
-    return (await fn(state, deps)) as Partial<S> | undefined;
+): LangGraphNode<unknown> {
+  return async (state: unknown) => {
+    return await fn(state as S, deps);
   };
 }
 

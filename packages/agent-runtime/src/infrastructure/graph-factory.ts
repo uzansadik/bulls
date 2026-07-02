@@ -12,7 +12,6 @@
 import type { BaseCheckpointSaver, CompiledStateGraph } from "@langchain/langgraph";
 
 import type { NodeDeps } from "../domain/langgraph-node";
-import type { AgentRunState } from "../domain/state";
 
 /**
  * Inputs every subgraph factory needs at compile time.
@@ -29,13 +28,14 @@ export interface CompiledGraphDeps extends Omit<NodeDeps, "checkpointer"> {
 /**
  * Factory signature: `deps => compiled graph`.
  *
- * Generic `S` is the subgraph's typed state (extends AgentRunState).
- * `U` is the update type — usually left as `unknown` because the
- * LangGraph reducer chain determines the precise shape. The factory
- * may pick any annotation it wants, as long as it is a superset of
- * `AgentRunStateAnnotation`.
+ * Generics `S` / `U` are unconstrained because LangGraph's internal
+ * `StateType<Annotation.Root<...>>` is structurally identical to
+ * our canonical `AgentRunState` but nominally distinct — adding
+ * `extends AgentRunState` here forces a needless cast at every
+ * factory call site. The factory is responsible for picking an
+ * annotation that produces a state shape compatible with
+ * `AgentRunState`.
  */
-export type CompiledGraphFactory<
-  S extends AgentRunState = AgentRunState,
-  U = unknown,
-> = (deps: CompiledGraphDeps) => CompiledStateGraph<S, U>;
+export type CompiledGraphFactory<S = unknown, U = unknown> = (
+  deps: CompiledGraphDeps,
+) => CompiledStateGraph<S, U>;

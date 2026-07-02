@@ -52,7 +52,7 @@ interface CompiledGraphInternal {
  * factory invocation.
  */
 export function createCompiledGraphBundle(input: {
-  factories: Record<string, CompiledGraphFactory<AgentRunState>>;
+  factories: Record<string, CompiledGraphFactory>;
   deps: CompiledGraphDeps;
 }): CompiledGraphBundle {
   const compiled: CompiledGraphInternal[] = [];
