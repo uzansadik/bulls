@@ -33,7 +33,7 @@ interface ChatRequestBody {
   readonly locale?: string;
 }
 
-const DEFAULT_MODEL_KEY = "claude-sonnet-4-6";
+export const DEFAULT_MODEL_KEY = "claude-sonnet-4-6";
 
 function financeSystemPrompt(localeHint: string): string {
   return [
