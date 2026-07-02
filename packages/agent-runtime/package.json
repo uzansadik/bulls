@@ -11,7 +11,10 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -24,6 +27,7 @@
   "dependencies": {
     "@langchain/core": "latest",
     "@langchain/langgraph": "latest",
+    "@langchain/langgraph-checkpoint-postgres": "^1.0.4",
     "@openbulls/billing": "workspace:*",
     "@openbulls/db": "workspace:*",
     "@openbulls/jobs": "workspace:*",
