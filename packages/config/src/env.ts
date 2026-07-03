@@ -45,6 +45,10 @@ interface ServerEnv {
   AGENT_GRAPH_MAX_RETRIES: number;
   AGENT_GRAPH_CHECKPOINT_EVERY_N_STEPS: number;
   AGENT_JOB_TIMEOUT_MS: number;
+  // Cron dispatcher (Faz 5)
+  CRON_QUEUE_NAME: string;
+  CRON_TICK_INTERVAL_MS: number;
+  CRON_BATCH_SIZE: number;
 }
 
 interface PublicEnv {
@@ -115,6 +119,11 @@ export function serverEnv(): ServerEnv {
       1,
     ),
     AGENT_JOB_TIMEOUT_MS: optionalNumber('AGENT_JOB_TIMEOUT_MS', 3_600_000),
+    // Cron dispatcher (Faz 5) — sane defaults so the cron app boots
+    // without explicit configuration in dev.
+    CRON_QUEUE_NAME: process.env.CRON_QUEUE_NAME ?? 'automation-dispatch',
+    CRON_TICK_INTERVAL_MS: optionalNumber('CRON_TICK_INTERVAL_MS', 60_000),
+    CRON_BATCH_SIZE: optionalNumber('CRON_BATCH_SIZE', 50),
   };
   cachedServer = env;
   return env;
