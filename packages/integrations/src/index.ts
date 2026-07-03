@@ -1,7 +1,13 @@
 /**
- * @openbulls/integrations — package skeleton.
+ * @openbulls/integrations — public barrel.
  *
- * Will be populated with domain/application/infrastructure layers
- * (see CLAUDE.md). For now this file is the public entry point.
+ * Consumers (`packages/notifications`, `apps/agent-worker`,
+ * `apps/telegram-bot`) import everything from this entry point.
+ * Internal layout (`domain/`, `application/`) stays free to evolve.
  */
-export {};
+
+// Domain (encryption + webhook signing)
+export * from "./domain";
+
+// Application (config wrappers)
+export * from "./application";

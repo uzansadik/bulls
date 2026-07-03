@@ -56,6 +56,9 @@ importers:
       '@openbulls/market-data':
         specifier: workspace:*
         version: link:../../packages/market-data
+      '@openbulls/notifications':
+        specifier: workspace:*
+        version: link:../../packages/notifications
       '@openbulls/portfolio':
         specifier: workspace:*
         version: link:../../packages/portfolio
@@ -501,6 +504,9 @@ importers:
       '@openbulls/db':
         specifier: workspace:*
         version: link:../db
+      '@openbulls/logger':
+        specifier: workspace:*
+        version: link:../logger
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -508,9 +514,15 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.0
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@22.20.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.20.0)(typescript@5.9.3))
 
   packages/jobs:
     dependencies:
@@ -610,6 +622,24 @@ importers:
       '@openbulls/db':
         specifier: workspace:*
         version: link:../db
+      '@openbulls/integrations':
+        specifier: workspace:*
+        version: link:../integrations
+      '@openbulls/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@openbulls/shared':
+        specifier: workspace:*
+        version: link:../shared
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(@opentelemetry/api@1.9.0)(kysely@0.29.2)(pg@8.22.0)(postgres@3.4.9)
+      grammy:
+        specifier: ^1.36.0
+        version: 1.44.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -617,9 +647,15 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.20.0
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(tsx@4.22.4)(typescript@5.9.3)
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@22.20.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.20.0)(typescript@5.9.3))
 
   packages/portfolio:
     dependencies:
@@ -1945,6 +1981,9 @@ packages:
   '@google/generative-ai@0.24.1':
     resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
     engines: {node: '>=18.0.0'}
+
+  '@grammyjs/types@3.28.0':
+    resolution: {integrity: sha512-4JvXCdxRZHCje0M4gHzLwtB4bLno3WD28xd8CNfk4POWIu73BFnSvGeW6OQ5gPem4eYTEwkD9yDaXssixl6tMQ==}
 
   '@hookform/resolvers@5.4.0':
     resolution: {integrity: sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw==}
@@ -4715,6 +4754,10 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  grammy@1.44.0:
+    resolution: {integrity: sha512-gGVykS5+c5f1tPV97LuU6IDRMawE2NzpwM9pNz58HQ35IZXDnYL3VOLvNzYognPSeBIOSzQXRu5w96V0aY8y8A==}
+    engines: {node: ^12.20.0 || >=14.13.1}
+
   graphql@16.14.2:
     resolution: {integrity: sha512-Chq1s4CY7jmh8gO2qvLIJyfCDIN+EHLFW/9iShnp1z8FjBQMoodWP1kDC36VAMXXIvAjj4ARa7ntfAV2BrjsbA==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
@@ -7134,6 +7177,8 @@ snapshots:
       tslib: 2.8.1
 
   '@google/generative-ai@0.24.1': {}
+
+  '@grammyjs/types@3.28.0': {}
 
   '@hookform/resolvers@5.4.0(react-hook-form@7.80.0(react@19.2.7))':
     dependencies:
@@ -9855,6 +9900,16 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  grammy@1.44.0:
+    dependencies:
+      '@grammyjs/types': 3.28.0
+      abort-controller: 3.0.0
+      debug: 4.4.3
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   graphql@16.14.2: {}
 

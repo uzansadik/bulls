@@ -28,8 +28,11 @@ interface ServerEnv {
   ANTHROPIC_API_KEY: string | undefined;
   OPENAI_API_KEY: string | undefined;
   GOOGLE_GENERATIVE_AI_API_KEY: string | undefined;
-  TELEGRAM_BOT_TOKEN: string | undefined;
+  TELEGRAM_BOT_TOKEN: string;
+  TELEGRAM_BOT_USERNAME: string;
+  TELEGRAM_WEBHOOK_URL: string | undefined;
   TELEGRAM_WEBHOOK_SECRET: string | undefined;
+  TELEGRAM_LINK_TOKEN_TTL_SEC: number;
   TWELVE_DATA_API_KEY: string | undefined;
   YAHOO_FINANCE_API_KEY: string | undefined;
   KAP_API_KEY: string | undefined;
@@ -95,8 +98,14 @@ export function serverEnv(): ServerEnv {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    TELEGRAM_BOT_TOKEN: required('TELEGRAM_BOT_TOKEN'),
+    TELEGRAM_BOT_USERNAME: required('TELEGRAM_BOT_USERNAME'),
+    TELEGRAM_WEBHOOK_URL: process.env.TELEGRAM_WEBHOOK_URL,
     TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,
+    TELEGRAM_LINK_TOKEN_TTL_SEC: optionalNumber(
+      'TELEGRAM_LINK_TOKEN_TTL_SEC',
+      300,
+    ),
     TWELVE_DATA_API_KEY: process.env.TWELVE_DATA_API_KEY,
     YAHOO_FINANCE_API_KEY: process.env.YAHOO_FINANCE_API_KEY,
     KAP_API_KEY: process.env.KAP_API_KEY,

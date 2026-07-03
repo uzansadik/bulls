@@ -9,19 +9,23 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "echo 'integrations is consumed via source'",
+    "build": "tsup",
     "dev": "echo 'integrations is consumed via source'",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "lint": "biome check src",
-    "clean": "rm -rf .turbo"
+    "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
     "@openbulls/config": "workspace:*",
-    "@openbulls/db": "workspace:*"
+    "@openbulls/db": "workspace:*",
+    "@openbulls/logger": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   }
 }
