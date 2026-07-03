@@ -169,7 +169,7 @@ Hedef: Vercel AI SDK + AI Gateway entegrasyonu, model seçimi, streaming chat UX
 
 **Faz 5'e köprü:** Subgraph'lar artık `IModelGateway` üzerinden model çağırır — Faz 5'te `packages/automation` executor'ları `enqueueAgentRun` ile tetiklenecek. `apps/cron` runner'ı (`enqueueDueUserScheduledJobs`) `packages/automation`'a dispatch edecek. `packages/ai` tool selector Faz 5'te LLM-assisted'e evrilecek. `model_pricing` DB tablosu Faz 5'te hardcoded registry'nin yerini alacak. User-memory + investment-preference-memory Faz 5'te conversation-memory'ye eklenir. Tool call UI'ı (`tool-*` event parsing) Faz 5'te `useChatModel`'e eklenecek.
 
-### Faz 5 — `apps/cron` + `packages/automation`
+### Faz 5 — `apps/cron` + `packages/automation` ✅ Done
 
 Hedef: Kullanıcının oluşturduğu zamanlanmış işler generik. Hard-coded cron job yok.
 
@@ -186,6 +186,10 @@ Hedef: Kullanıcının oluşturduğu zamanlanmış işler generik. Hard-coded cr
 **Bağımlılık:** `db`, `jobs`, `agent-runtime`, `market-data`, `portfolio`.
 
 **Çıktı:** "Her Cuma 18:00'de portföy snapshot'ı al + e-posta gönder" işi DB'de tutulur, cron dispatcher executor'a iletir.
+
+*(8 commit, branch `faz-5/cron-automation`. `packages/automation` 32 test (domain/schedule 11, executor-registry 5, dispatch 6, default-executors 10) + `apps/cron` 1 smoke + `apps/agent-worker` 2 scheduled-job-dispatch smoke. 6 built-in executor: portfolio_daily_review/weekly_review, price_alert, news_watch, earnings_calendar_watch (noop Faz 5), custom_agent. `apps/agent-worker` artık hem `agent-run` hem `scheduled-job-dispatch` job kind'larını consume ediyor. `nextRunAt` her dispatch sonrası advance edilir (failing executor sonsuz retry loop'a düşmesin). `dispatchDueJobs` failure policy: unknown executor → skipped, buildPayload throws → failed, producer throws → failed, computeNextRunAt throws → failed + no advance. Yeni env: `CRON_TICK_INTERVAL_MS` (default 60s), `CRON_BATCH_SIZE` (50), `CRON_QUEUE_NAME` (`automation-dispatch`). `croner` TZ-aware cron parser olarak. Idempotent handler: row `succeeded`/`failed`/`skipped` ise ikinci çağrı no-op.)*
+
+**Faz 6'ya köprü:** `price_alert`/`news_watch` executor'ları `enqueueNotificationDispatch` producer'ı Faz 5'te çağırır, tüketici (Telegram / e-posta handler) Faz 6'da gelecek. `enqueueReportRender` producer Faz 5'te mevcut; Faz 7 PDF/Excel handler'ı. `agent_run_id` ↔ `scheduled_job_executions.agent_run_id` back-fill Faz 6+ observability worker ile. Tool selector Faz 5'te hardcoded registry; Faz 8'de LLM-assisted.
 
 ### Faz 6 — `packages/notifications` + `apps/telegram-bot`
 

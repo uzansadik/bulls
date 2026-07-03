@@ -19,14 +19,14 @@ openbulls/
    ├─ auth/                        ← Sprint 1
    ├─ ui/                          ← Sprint 2
    ├─ portfolio/                   ← Sprint 4
-   ├─ market-data/                 ← Sprint 4
+   ├─ market-data/                 ← Sprint 1
    ├─ ai/                          ← Sprint 3
    ├─ agent-runtime/               ← Sprint 3
-   ├─ automation/                  ← Sprint 4
+   ├─ automation/                  ← Sprint 5
    ├─ billing/                     ← Sprint 3
-   ├─ notifications/               ← Sprint 4
-   ├─ integrations/                ← Sprint 4
-   ├─ reports/                     ← Sprint 4
+   ├─ notifications/               ← Sprint 6
+   ├─ integrations/                ← Sprint 5
+   ├─ reports/                     ← Sprint 7
    └─ jobs/                        ← Sprint 3
 ```
 

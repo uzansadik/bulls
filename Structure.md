@@ -124,6 +124,8 @@ openbulls/
 │  │  │  ├─ process.ts
 │  │  │  ├─ job-handler.ts
 │  │  │  ├─ heartbeat.ts
+│  │  │  ├─ notification-dispatch-handler.ts
+│  │  │  ├─ scheduled-job-dispatch-handler.ts
 │  │  │  ├─ infrastructure/
 │  │  │  │  ├─ model-adapter.ts
 │  │  │  │  ├─ billing-adapter.ts
@@ -530,23 +532,36 @@ openbulls/
 │  │  ├─ src/
 │  │  │  ├─ index.ts
 │  │  │  ├─ domain/
-│  │  │  │  ├─ notification-channel.ts
-│  │  │  │  ├─ notification-template.ts
-│  │  │  │  └─ notification-priority.ts
+│  │  │  │  ├─ brands.ts
+│  │  │  │  ├─ channel.ts
+│  │  │  │  ├─ errors.ts
+│  │  │  │  ├─ index.ts
+│  │  │  │  ├─ notification.ts
+│  │  │  │  └─ template.ts
 │  │  │  ├─ application/
+│  │  │  │  ├─ channel-registry.ts
+│  │  │  │  ├─ find-user-channels.query.ts
+│  │  │  │  ├─ index.ts
+│  │  │  │  ├─ jobs.types.ts
+│  │  │  │  ├─ list-channels.query.ts
 │  │  │  │  ├─ send-notification.command.ts
-│  │  │  │  └─ notification-router.ts
-│  │  │  └─ infrastructure/
-│  │  │     ├─ channels/
-│  │  │     │  ├─ email.channel.ts
-│  │  │     │  ├─ telegram.channel.ts
-│  │  │     │  ├─ in-app.channel.ts
-│  │  │     │  └─ webhook.channel.ts
-│  │  │     └─ templates/
-│  │  │        ├─ portfolio-review.template.ts
-│  │  │        ├─ price-alert.template.ts
-│  │  │        └─ credit-insufficient.template.ts
-│  │  └─ package.json
+│  │  │  │  └─ channels/
+│  │  │  │     └─ ports.ts
+│  │  │  ├─ infrastructure/
+│  │  │  │  ├─ channels/
+│  │  │  │  │  └─ telegram.channel.ts
+│  │  │  │  ├─ composition.ts
+│  │  │  │  ├─ default-channel-registry.factory.ts
+│  │  │  │  ├─ index.ts
+│  │  │  │  └─ repositories/
+│  │  │  │     ├─ drizzle-repositories.ts
+│  │  │  │     └─ ports.ts
+│  │  │  └─ __tests__/
+│  │  │     └─ setup.ts
+│  │  ├─ package.json
+│  │  ├─ tsconfig.json
+│  │  ├─ tsup.config.ts
+│  │  └─ vitest.config.ts
 │  │
 │  ├─ integrations/
 │  │  ├─ src/
