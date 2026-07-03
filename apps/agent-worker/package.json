@@ -18,6 +18,7 @@
     "@langchain/langgraph": "latest",
     "@openbulls/agent-runtime": "workspace:*",
     "@openbulls/ai": "workspace:*",
+    "@openbulls/automation": "workspace:*",
     "@openbulls/billing": "workspace:*",
     "@openbulls/config": "workspace:*",
     "@openbulls/db": "workspace:*",
