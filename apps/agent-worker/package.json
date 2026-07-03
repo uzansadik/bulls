@@ -25,6 +25,7 @@
     "@openbulls/jobs": "workspace:*",
     "@openbulls/logger": "workspace:*",
     "@openbulls/market-data": "workspace:*",
+    "@openbulls/notifications": "workspace:*",
     "@openbulls/portfolio": "workspace:*",
     "@openbulls/shared": "workspace:*",
     "bullmq": "^5.34.0",
