@@ -1,7 +1,30 @@
 /**
- * @openbulls/notifications — package skeleton.
+ * @openbulls/notifications — public barrel.
  *
- * Will be populated with domain/application/infrastructure layers
- * (see CLAUDE.md). For now this file is the public entry point.
+ * Consumers (`apps/agent-worker`, `apps/telegram-bot`, future admin UI)
+ * import everything from this entry point. Internal layout
+ * (`domain/`, `application/`, `infrastructure/`) stays free to evolve.
  */
-export {};
+
+// Domain
+export * from "./domain";
+
+// Application
+export * from "./application";
+
+// Infrastructure (re-exports selected factories + types)
+export {
+  DrizzleNotificationChannelRepository,
+  DrizzleNotificationRepository,
+  TelegramChannelSender,
+  createDefaultChannelRegistry,
+  createNotificationServices,
+  createNotificationServicesFromDb,
+} from "./infrastructure";
+export type {
+  INotificationChannelRepository,
+  INotificationRepository,
+  NewNotificationInput,
+  NotificationServicesHandle,
+  TelegramSenderDeps,
+} from "./infrastructure";

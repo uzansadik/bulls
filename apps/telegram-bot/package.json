@@ -1,9 +1,9 @@
 {
-  "name": "@openbulls/agent-worker",
+  "name": "@openbulls/telegram-bot",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup",
@@ -14,22 +14,12 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@langchain/core": "latest",
-    "@langchain/langgraph": "latest",
-    "@openbulls/agent-runtime": "workspace:*",
-    "@openbulls/ai": "workspace:*",
-    "@openbulls/automation": "workspace:*",
-    "@openbulls/billing": "workspace:*",
     "@openbulls/config": "workspace:*",
     "@openbulls/db": "workspace:*",
-    "@openbulls/jobs": "workspace:*",
+    "@openbulls/integrations": "workspace:*",
     "@openbulls/logger": "workspace:*",
-    "@openbulls/market-data": "workspace:*",
     "@openbulls/notifications": "workspace:*",
-    "@openbulls/portfolio": "workspace:*",
-    "@openbulls/shared": "workspace:*",
-    "bullmq": "^5.34.0",
-    "ioredis": "^5.4.1",
+    "grammy": "^1.36.0",
     "pino": "^9.5.0"
   },
   "devDependencies": {
