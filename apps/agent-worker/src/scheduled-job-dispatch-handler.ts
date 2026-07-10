@@ -57,9 +57,6 @@ export function makeScheduledJobDispatchHandler(
     const execution = await deps.scheduledJobExecutionRepo.getById(job.executionId);
     if (!execution) {
       deps.logger.warn("scheduled-job-dispatch: execution row missing", log);
-      // Nothing to mark; we still throw so BullMQ retries — the
-      // dispatcher is the authoritative writer and may not have
-      // committed yet (network blip between apps).
       throw new Error(`execution row missing: ${job.executionId}`);
     }
 
@@ -80,28 +77,26 @@ export function makeScheduledJobDispatchHandler(
     const jobDefinition = await deps.userScheduledJobRepo.getById(job.jobDefinitionKey);
     if (!jobDefinition) {
       deps.logger.error("scheduled-job-dispatch: job definition missing", log);
-      await deps.scheduledJobExecutionRepo.markFailed(job.executionId, "job_definition_not_found");
+      await deps.scheduledJobExecutionRepo.markFailed(
+        job.executionId,
+        "job_definition_not_found",
+      );
       throw new Error(`job definition missing: ${job.jobDefinitionKey}`);
     }
 
     // 4. Mark running + capture the BullMQ jobId on the row.
     await deps.scheduledJobExecutionRepo.markRunning(job.executionId, job.jobId);
 
-    // 5. Look up the executor. Unknown type is a permanent failure
-    //    (the dispatcher would have caught this — but if the row
-    //    made it past the dispatcher somehow, surface it).
+    // 5. Look up the executor.
     const executor = deps.automation.registry.get(jobDefinition.executorType);
     if (!executor) {
       const message = `executor_not_registered: ${jobDefinition.executorType}`;
       deps.logger.warn("scheduled-job-dispatch: unknown executor", log);
       await deps.scheduledJobExecutionRepo.markSkipped(job.executionId, message);
-      // Do not throw — BullMQ should not retry a permanent skip.
       return;
     }
 
-    // 6. Build the payload. The dispatcher already validated it,
-    //    but a DB row mutation between dispatch and consume could
-    //    in theory invalidate the schema; re-validate here.
+    // 6. Build the payload.
     let payload: unknown;
     try {
       payload = executor.buildPayload(
@@ -114,7 +109,6 @@ export function makeScheduledJobDispatchHandler(
         err: reason,
       });
       await deps.scheduledJobExecutionRepo.markFailed(job.executionId, reason);
-      // Permanent failure — do not throw.
       return;
     }
 
@@ -128,15 +122,11 @@ export function makeScheduledJobDispatchHandler(
         logger: deps.logger,
       });
 
-      // Attach agent_run_id when the executor enqueued an agent-run.
-      // The downstream enqueue returns the BullMQ jobId; we can't
-      // resolve that to an `agent_run_id` here (the agent worker
-      // creates the row), so we leave the attachment for a future
-      // job-state lookup. Faz 6+: a separate observability worker
-      // back-fills this from BullMQ job metadata.
-
       if (result.kind === "noop") {
-        await deps.scheduledJobExecutionRepo.markSkipped(job.executionId, result.notes ?? "noop");
+        await deps.scheduledJobExecutionRepo.markSkipped(
+          job.executionId,
+          result.notes ?? "noop",
+        );
         deps.logger.info("scheduled-job-dispatch: skipped (noop)", {
           ...log,
           notes: result.notes,
@@ -157,9 +147,6 @@ export function makeScheduledJobDispatchHandler(
         err: reason,
       });
       await deps.scheduledJobExecutionRepo.markFailed(job.executionId, reason);
-      // Re-throw so BullMQ's retry policy engages. The dispatcher
-      // already advanced `next_run_at`, so the next tick will pick
-      // up the *next* scheduled occurrence, not this one.
       throw err;
     }
   };
