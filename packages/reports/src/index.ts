@@ -52,3 +52,11 @@ export type {
   CreateReportsServicesInput,
   RendererResolver,
 } from "./infrastructure/composition";
+export {
+  TEMPLATE_BY_REPORT_TYPE,
+  compileTemplate,
+  createDefaultRendererResolver,
+  renderMarkdown,
+  renderTemplate,
+} from "./infrastructure";
+export { asLocale, resolveMessage, t } from "./infrastructure/i18n/translate";

@@ -2,9 +2,9 @@
  * @openbulls/reports — composition root.
  *
  * Wires \`createReportsServicesFromDb\` for the agent-worker boot.
- * Faz 7.2 leaves the renderer registry empty (no-op renderer) so
- * the orchestration is exercisable end-to-end. Faz 7.3 swaps the
- * no-op registry for the real PDF/Excel/Markdown renderers.
+ * Faz 7.3 swaps the no-op registry for the markdown renderer;
+ * PDF + Excel slots throw \`TemplateMissingError\` so callers
+ * see a clear "not yet implemented" rather than empty bytes.
  */
 import { db as defaultDb } from "@openbulls/db/client";
 import { logger as pinoLogger } from "@openbulls/logger";
@@ -13,13 +13,12 @@ import { type ReportsServices, getReport, listReports, renderReport } from "../a
 import type { ReportsDeps } from "../application";
 import { DrizzleReportRepository } from "./repositories/drizzle-repositories";
 import type { IReportRepository } from "./repositories/ports";
+import { createDefaultRendererResolver } from "./renderer-registry";
 
 /**
- * Renderer slot. Faz 7.2 ships a no-op so the command is
- * exercisable; Faz 7.3 plugs a real registry. The slot is a
- * closure, not a class — the agent-worker boot calls
- * \`createReportsServicesFromDb\` and never touches renderers
- * directly.
+ * Renderer slot. The composition root passes a real
+ * \`createDefaultRendererResolver()\` by default; tests can swap
+ * it out (see \`render-report.command.test.ts\`).
  */
 export type RendererResolver = (
   reportType: string,
@@ -35,11 +34,18 @@ export interface CreateReportsServicesInput {
   readonly storage: ReportsDeps["storage"];
   readonly logger?: ReportsDeps["logger"];
   readonly now?: () => Date;
-  /** Faz 7.3 hook; today defaults to a no-op renderer. */
+  /** Override the default renderer resolver. */
   readonly resolveRenderer?: RendererResolver;
 }
 
-const noopResolver: RendererResolver = async (reportType, format) => ({
+/**
+ * Tiny no-op resolver kept exported for tests that want a stub
+ * (e.g. the \`render-report.command\` orchestration tests assert
+ * markReady even when the renderer is a no-op). Production
+ * callers always use \`createDefaultRendererResolver\` via the
+ * composition root.
+ */
+export const noopResolver: RendererResolver = async (reportType, format) => ({
   contentType:
     format === "pdf"
       ? "application/pdf"
@@ -47,10 +53,6 @@ const noopResolver: RendererResolver = async (reportType, format) => ({
         ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         : "text/markdown",
   render: async (): Promise<Buffer> => {
-    // No-op renderer: emits a tiny stub document so the
-    // orchestration path (insert → render → upload → markReady)
-    // can be exercised end-to-end. The stub body is intentionally
-    // recognizable so tests can assert on it.
     return Buffer.from(
       `# Openbulls report (stub)\n\ntype: ${reportType}\nformat: ${format}\n`,
     );
@@ -65,7 +67,7 @@ export function createReportsServicesFromDb(
   const logger = input.logger ?? pinoLogger;
   const now = input.now ?? (() => new Date());
   const resolveRenderer: RendererResolver =
-    input.resolveRenderer ?? noopResolver;
+    input.resolveRenderer ?? createDefaultRendererResolver();
 
   return {
     services: {
@@ -77,6 +79,3 @@ export function createReportsServicesFromDb(
     },
   };
 }
-
-/** Exposed for tests that want the no-op renderer as a fallback. */
-export { noopResolver };

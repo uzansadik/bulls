@@ -19,9 +19,11 @@
   "dependencies": {
     "@openbulls/config": "workspace:*",
     "@openbulls/db": "workspace:*",
+    "@openbulls/i18n": "workspace:*",
     "@openbulls/logger": "workspace:*",
     "@openbulls/storage": "workspace:*",
     "drizzle-orm": "^0.45.2",
+    "handlebars": "^4.7.9",
     "zod": "^3.23.8"
   },
   "devDependencies": {
