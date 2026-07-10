@@ -2,7 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local", ".env"],
   "globalEnv": ["NODE_ENV"],
-  "concurrency": "20",
+  "concurrency": "24",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

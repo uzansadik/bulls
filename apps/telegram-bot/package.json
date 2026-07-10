@@ -1,0 +1,33 @@
+{
+  "name": "@openbulls/telegram-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome check src",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@openbulls/config": "workspace:*",
+    "@openbulls/db": "workspace:*",
+    "@openbulls/integrations": "workspace:*",
+    "@openbulls/logger": "workspace:*",
+    "@openbulls/notifications": "workspace:*",
+    "grammy": "^1.36.0",
+    "pino": "^9.5.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.2",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
+  }
+}
