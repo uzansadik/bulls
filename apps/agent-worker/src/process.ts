@@ -22,6 +22,11 @@ import {
   createPostgresSaver,
   defaultGraphFactories,
 } from "@openbulls/agent-runtime";
+import type {
+  AutomationServices,
+  IScheduledJobExecutionRepository,
+  IUserScheduledJobRepository,
+} from "@openbulls/automation";
 import type { BillingServices } from "@openbulls/billing";
 import type { ServerEnv } from "@openbulls/config";
 import { db } from "@openbulls/db/client";
@@ -37,6 +42,7 @@ import { createMarketDataAdapter } from "./infrastructure/market-data-adapter";
 import { createModelAdapter } from "./infrastructure/model-adapter";
 import { createPortfolioAdapter } from "./infrastructure/portfolio-adapter";
 import { makeAgentRunHandler } from "./job-handler";
+import { makeScheduledJobDispatchHandler } from "./scheduled-job-dispatch-handler";
 
 /** Inputs the boot sequence needs. `services` come pre-wired by the caller. */
 export interface ProcessMainInput {
@@ -45,6 +51,9 @@ export interface ProcessMainInput {
   readonly billing: BillingServices;
   readonly marketData: MarketDataServices;
   readonly portfolio: PortfolioServices;
+  readonly automation: AutomationServices;
+  readonly userScheduledJobRepo: IUserScheduledJobRepository;
+  readonly scheduledJobExecutionRepo: IScheduledJobExecutionRepository;
   readonly consumer: import("@openbulls/jobs").IJobConsumer;
   readonly logger?: Logger;
 }
@@ -107,6 +116,16 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
   });
 
   await input.consumer.process("agent-run", makeAgentRunHandler({ bundle, logger: loggerLike }));
+  await input.consumer.process(
+    "scheduled-job-dispatch",
+    makeScheduledJobDispatchHandler({
+      automation: input.automation,
+      userScheduledJobRepo: input.userScheduledJobRepo,
+      scheduledJobExecutionRepo: input.scheduledJobExecutionRepo,
+      logger: loggerLike,
+      now: () => new Date(),
+    }),
+  );
   await input.consumer.start();
 
   const heartbeat = startWorkerHeartbeat(input.logger ?? pinoLogger, input.env);

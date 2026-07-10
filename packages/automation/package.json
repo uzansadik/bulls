@@ -9,19 +9,30 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "echo 'automation is consumed via source'",
+    "build": "tsup",
     "dev": "echo 'automation is consumed via source'",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "lint": "biome check src",
-    "clean": "rm -rf .turbo"
+    "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@openbulls/agent-runtime": "workspace:*",
     "@openbulls/config": "workspace:*",
-    "@openbulls/db": "workspace:*"
+    "@openbulls/db": "workspace:*",
+    "@openbulls/jobs": "workspace:*",
+    "@openbulls/logger": "workspace:*",
+    "@openbulls/market-data": "workspace:*",
+    "@openbulls/shared": "workspace:*",
+    "croner": "^9.0.0",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.10.2",
-    "typescript": "^5.7.2"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   }
 }

@@ -15,30 +15,25 @@
  * (systemd, k8s, fly.io) to send SIGTERM.
  */
 
-import { createBillingServicesFromDb } from '@openbulls/billing';
-import { serverEnv } from '@openbulls/config';
-import { closeDb, db } from '@openbulls/db/client';
-import { createRepositories } from '@openbulls/db/repositories';
+import { createAutomationServices } from "@openbulls/automation";
+import { createBillingServicesFromDb } from "@openbulls/billing";
+import { serverEnv } from "@openbulls/config";
+import { closeDb, db } from "@openbulls/db/client";
+import { createRepositories } from "@openbulls/db/repositories";
 import {
   type IJobConsumer,
   createBullMqConsumer,
   createJobsServicesFromEnv,
-} from '@openbulls/jobs';
-import { logger as pinoLogger } from '@openbulls/logger';
-import {
-  type MarketDataEnv,
-  createMarketDataServicesFromEnv,
-} from '@openbulls/market-data';
-import {
-  type PortfolioServices,
-  createPortfolioServicesFromDb,
-} from '@openbulls/portfolio';
+} from "@openbulls/jobs";
+import { logger as pinoLogger } from "@openbulls/logger";
+import { type MarketDataEnv, createMarketDataServicesFromEnv } from "@openbulls/market-data";
+import { type PortfolioServices, createPortfolioServicesFromDb } from "@openbulls/portfolio";
 
-import { processMain } from './process';
+import { processMain } from "./process";
 
 const REQUIRED_REDIS = (env: ReturnType<typeof serverEnv>): string => {
   if (!env.REDIS_URL) {
-    throw new Error('REDIS_URL is required for apps/agent-worker');
+    throw new Error("REDIS_URL is required for apps/agent-worker");
   }
   return env.REDIS_URL;
 };
@@ -51,7 +46,7 @@ async function main(): Promise<void> {
       concurrency: env.WORKER_CONCURRENCY,
       model: env.AGENT_GRAPH_DEFAULT_MODEL,
     },
-    'agent-worker: booting',
+    "agent-worker: booting",
   );
 
   const redisUrl = REQUIRED_REDIS(env);
@@ -76,19 +71,15 @@ async function main(): Promise<void> {
   const billing = createBillingServicesFromDb({
     db,
     env,
-    ...(env.STRIPE_SECRET_KEY ? { provider: 'stripe' as const } : {}),
+    ...(env.STRIPE_SECRET_KEY ? { provider: "stripe" as const } : {}),
   });
 
   // 3. Market data — wire a router + in-memory caches. The worker
   //    uses the mock adapter for now (Faz 8 swaps real providers
   //    in once provisioning is in place).
   const marketEnv: MarketDataEnv = {
-    ...(env.YAHOO_FINANCE_API_KEY
-      ? { YAHOO_FINANCE_API_KEY: env.YAHOO_FINANCE_API_KEY }
-      : {}),
-    ...(env.TWELVE_DATA_API_KEY
-      ? { TWELVE_DATA_API_KEY: env.TWELVE_DATA_API_KEY }
-      : {}),
+    ...(env.YAHOO_FINANCE_API_KEY ? { YAHOO_FINANCE_API_KEY: env.YAHOO_FINANCE_API_KEY } : {}),
+    ...(env.TWELVE_DATA_API_KEY ? { TWELVE_DATA_API_KEY: env.TWELVE_DATA_API_KEY } : {}),
     ...(env.KAP_API_KEY ? { KAP_API_KEY: env.KAP_API_KEY } : {}),
     ...(env.TCMB_API_KEY ? { TCMB_API_KEY: env.TCMB_API_KEY } : {}),
   };
@@ -112,13 +103,24 @@ async function main(): Promise<void> {
     now: () => new Date(),
   });
 
-  // 5. Process main loop — wires adapters + runtime + handlers.
+  // 5. Automation services — wires the executor registry + DB
+  //    repositories used by the `scheduled-job-dispatch` handler.
+  const automation = createAutomationServices({
+    db,
+    jobs: jobs.services,
+    logger: pinoLogger,
+  });
+
+  // 6. Process main loop — wires adapters + runtime + handlers.
   const handle = await processMain({
     env,
     jobs: jobs.services,
     billing,
     marketData,
     portfolio,
+    automation: automation.services,
+    userScheduledJobRepo: automation.userScheduledJobRepo,
+    scheduledJobExecutionRepo: automation.scheduledJobExecutionRepo,
     consumer,
     logger: pinoLogger,
   });
@@ -128,7 +130,7 @@ async function main(): Promise<void> {
       queue: env.WORKER_QUEUE_NAME,
       graphs: Object.keys(handle.bundle.graphs),
     },
-    'agent-worker: ready',
+    "agent-worker: ready",
   );
 
   // 6. Graceful shutdown.
@@ -136,21 +138,21 @@ async function main(): Promise<void> {
   const stop = async (signal: string): Promise<void> => {
     if (stopping) return;
     stopping = true;
-    pinoLogger.info({ signal }, 'agent-worker: shutting down');
+    pinoLogger.info({ signal }, "agent-worker: shutting down");
     try {
       await handle.close();
       await jobs.close();
       await closeDb();
     } catch (err) {
-      pinoLogger.error({ err: String(err) }, 'agent-worker: shutdown failed');
+      pinoLogger.error({ err: String(err) }, "agent-worker: shutdown failed");
     }
     process.exit(0);
   };
-  process.on('SIGTERM', () => void stop('SIGTERM'));
-  process.on('SIGINT', () => void stop('SIGINT'));
+  process.on("SIGTERM", () => void stop("SIGTERM"));
+  process.on("SIGINT", () => void stop("SIGINT"));
 }
 
 main().catch((err: unknown) => {
-  pinoLogger.fatal({ err: String(err) }, 'agent-worker: fatal');
+  pinoLogger.fatal({ err: String(err) }, "agent-worker: fatal");
   process.exit(1);
 });
