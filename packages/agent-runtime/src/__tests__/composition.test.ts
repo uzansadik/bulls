@@ -104,6 +104,7 @@ describe("CompiledGraphBundle", () => {
       "company-analysis",
       "market-news",
       "portfolio-review",
+      "report-writer",
     ]);
   });
 

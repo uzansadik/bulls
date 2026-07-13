@@ -14,11 +14,13 @@ import type { CompiledGraphFactory } from "./graph-factory";
 import { companyAnalysisGraph } from "../subgraphs/company-analysis.subgraph";
 import { marketNewsGraph } from "../subgraphs/market-news.subgraph";
 import { portfolioReviewGraph } from "../subgraphs/portfolio-review.subgraph";
+import { reportWriterGraph } from "../subgraphs/report-writer.subgraph";
 
 export const defaultGraphFactories: Record<string, CompiledGraphFactory> = {
   [GraphKey("company-analysis")]: companyAnalysisGraph,
   [GraphKey("portfolio-review")]: portfolioReviewGraph,
   [GraphKey("market-news")]: marketNewsGraph,
+  [GraphKey("report-writer")]: reportWriterGraph,
 };
 
 export const defaultGraphKeys: ReadonlyArray<string> = Object.keys(
