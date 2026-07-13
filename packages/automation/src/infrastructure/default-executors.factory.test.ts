@@ -15,6 +15,7 @@ import {
   createNewsWatchExecutor,
   createPortfolioDailyReviewExecutor,
   createPortfolioWeeklyReviewExecutor,
+  createReportRenderExecutor,
 } from "./default-executors.factory";
 
 import type { JobsServices } from "@openbulls/jobs";
@@ -201,5 +202,91 @@ describe("createEarningsCalendarWatchExecutor", () => {
       logger: noopLogger,
     });
     expect(result.kind).toBe("noop");
+  });
+});
+
+describe("createReportRenderExecutor", () => {
+  it("type is \"report_render\"", () => {
+    const { jobs } = makeJobsMock();
+    const ex = createReportRenderExecutor({ jobs });
+    expect(ex.type).toBe("report_render");
+  });
+
+  it("buildPayload requires reportType + format", () => {
+    const { jobs } = makeJobsMock();
+    const ex = createReportRenderExecutor({ jobs });
+    expect(() => ex.buildPayload({})).toThrow(ExecutorInvalidPayloadError);
+    expect(() =>
+      ex.buildPayload({ reportType: "portfolio_review" }),
+    ).toThrow(ExecutorInvalidPayloadError);
+    expect(() =>
+      ex.buildPayload({ format: "pdf" }),
+    ).toThrow(ExecutorInvalidPayloadError);
+  });
+
+  it("buildPayload accepts a minimal payload (parameters default to {})", () => {
+    const { jobs } = makeJobsMock();
+    const ex = createReportRenderExecutor({ jobs });
+    const payload = ex.buildPayload({
+      reportType: "portfolio_review",
+      format: "markdown",
+    });
+    expect(payload).toMatchObject({
+      reportType: "portfolio_review",
+      format: "markdown",
+      parameters: {},
+    });
+  });
+
+  it("buildPayload passes through parameters + title + locale", () => {
+    const { jobs } = makeJobsMock();
+    const ex = createReportRenderExecutor({ jobs });
+    const payload = ex.buildPayload({
+      reportType: "company_analysis",
+      format: "pdf",
+      parameters: { symbol: "THYAO", windowDays: 90 },
+      title: "Q3 outlook",
+      locale: "en",
+    });
+    expect(payload).toMatchObject({
+      reportType: "company_analysis",
+      format: "pdf",
+      title: "Q3 outlook",
+      locale: "en",
+    });
+    expect(payload.parameters).toEqual({ symbol: "THYAO", windowDays: 90 });
+  });
+
+  it("run enqueues a report-render job and returns kind=report", async () => {
+    const { jobs, calls } = makeJobsMock();
+    const ex = createReportRenderExecutor({ jobs });
+    const result = await ex.run({
+      userId: "user-1",
+      jobDefinition: {
+        ...jobDefinitionBase,
+        executorType: "report_render",
+        inputPayload: {
+          reportType: "portfolio_review",
+          format: "markdown",
+        },
+      },
+      payload: {
+        reportType: "portfolio_review",
+        format: "markdown",
+        parameters: {},
+      },
+      now: new Date(),
+      logger: noopLogger,
+    });
+    expect(result.kind).toBe("report");
+    expect(result.downstreamJobIds).toEqual(["report-job-1"]);
+    const enqueueCall = calls.find((c) => c.method === "enqueueReportRender");
+    expect(enqueueCall).toBeDefined();
+    expect(enqueueCall?.args).toMatchObject({
+      userId: "user-1",
+      reportType: "portfolio_review",
+      format: "markdown",
+      payload: {},
+    });
   });
 });

@@ -1,7 +1,7 @@
 /**
  * @openbulls/automation — default executor registry factory.
  *
- * Registers all 6 built-in executors against a fresh
+ * Registers all 7 built-in executors against a fresh
  * `InMemoryExecutorRegistry`. The cron process and the agent-worker
  * process both call this at boot — same set, same wiring, identical
  * registry in both runtimes.
@@ -28,6 +28,7 @@ import {
   createPortfolioDailyReviewExecutor,
   createPortfolioWeeklyReviewExecutor,
   createPriceAlertExecutor,
+  createReportRenderExecutor,
 } from "./default-executors.factory";
 
 export interface CreateDefaultExecutorRegistryInput {
@@ -44,6 +45,7 @@ export function createDefaultExecutorRegistry(
   registry.register(createPortfolioWeeklyReviewExecutor(input));
   registry.register(createNewsWatchExecutor(input));
   registry.register(createEarningsCalendarWatchExecutor(input));
+  registry.register(createReportRenderExecutor(input));
   if (input.marketData) {
     registry.register(createPriceAlertExecutor({ jobs: input.jobs, marketData: input.marketData }));
   }

@@ -1,0 +1,1 @@
+ALTER TYPE "public"."job_executor_type" ADD VALUE 'report_render';
