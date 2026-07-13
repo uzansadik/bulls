@@ -27,6 +27,8 @@
     "@openbulls/market-data": "workspace:*",
     "@openbulls/notifications": "workspace:*",
     "@openbulls/portfolio": "workspace:*",
+    "@openbulls/reports": "workspace:*",
+    "@openbulls/storage": "workspace:*",
     "@openbulls/shared": "workspace:*",
     "bullmq": "^5.34.0",
     "ioredis": "^5.4.1",

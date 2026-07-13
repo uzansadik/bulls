@@ -35,6 +35,8 @@ import {
   type PortfolioServices,
   createPortfolioServicesFromDb,
 } from '@openbulls/portfolio';
+import { createReportsServicesFromDb } from '@openbulls/reports';
+import { createStorageAdapter } from '@openbulls/storage';
 
 import { processMain } from './process';
 
@@ -129,7 +131,17 @@ async function main(): Promise<void> {
     logger: pinoLogger,
   });
 
-  // 7. Process main loop — wires adapters + runtime + handlers.
+  // 7. Storage adapter + reports services (Faz 7) — wires the
+  //    IStorageAdapter backend (local-fs by default; s3 when
+  //    REPORT_STORAGE_BACKEND=s3) and the reports orchestrator.
+  const storage = createStorageAdapter({ env, logger: pinoLogger });
+  const reports = createReportsServicesFromDb({
+    db,
+    storage,
+    logger: pinoLogger,
+  });
+
+  // 8. Process main loop — wires adapters + runtime + handlers.
   const handle = await processMain({
     env,
     jobs: jobs.services,
@@ -140,6 +152,7 @@ async function main(): Promise<void> {
     userScheduledJobRepo: automation.userScheduledJobRepo,
     scheduledJobExecutionRepo: automation.scheduledJobExecutionRepo,
     notificationServices: notifications.services,
+    reportsServices: reports.services,
     consumer,
     logger: pinoLogger,
   });

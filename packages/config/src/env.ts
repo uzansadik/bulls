@@ -52,6 +52,18 @@ interface ServerEnv {
   CRON_QUEUE_NAME: string;
   CRON_TICK_INTERVAL_MS: number;
   CRON_BATCH_SIZE: number;
+  // Storage (Faz 7) — see `@openbulls/storage`. `local-fs` is the
+  // dev default; production should set `REPORT_STORAGE_BACKEND=s3`
+  // and provide S3_* keys.
+  REPORT_STORAGE_BACKEND: 'local-fs' | 's3' | undefined;
+  REPORT_LOCAL_STORAGE_DIR: string | undefined;
+  REPORT_SIGNED_URL_TTL_SEC: number | undefined;
+  REPORT_MAX_FILE_BYTES: number | undefined;
+  S3_BUCKET: string | undefined;
+  S3_REGION: string | undefined;
+  S3_ACCESS_KEY_ID: string | undefined;
+  S3_SECRET_ACCESS_KEY: string | undefined;
+  S3_ENDPOINT: string | undefined;
 }
 
 interface PublicEnv {
@@ -133,6 +145,25 @@ export function serverEnv(): ServerEnv {
     CRON_QUEUE_NAME: process.env.CRON_QUEUE_NAME ?? 'automation-dispatch',
     CRON_TICK_INTERVAL_MS: optionalNumber('CRON_TICK_INTERVAL_MS', 60_000),
     CRON_BATCH_SIZE: optionalNumber('CRON_BATCH_SIZE', 50),
+    // Storage (Faz 7) — defaults to local-fs for dev simplicity;
+    // see `@openbulls/storage` for adapter selection logic.
+    REPORT_STORAGE_BACKEND:
+      (process.env.REPORT_STORAGE_BACKEND as
+        | 'local-fs'
+        | 's3'
+        | undefined) ?? 'local-fs',
+    REPORT_LOCAL_STORAGE_DIR:
+      process.env.REPORT_LOCAL_STORAGE_DIR ?? './.storage',
+    REPORT_SIGNED_URL_TTL_SEC: optionalNumber(
+      'REPORT_SIGNED_URL_TTL_SEC',
+      900,
+    ),
+    REPORT_MAX_FILE_BYTES: optionalNumber('REPORT_MAX_FILE_BYTES', 50 * 1024 * 1024),
+    S3_BUCKET: process.env.S3_BUCKET,
+    S3_REGION: process.env.S3_REGION,
+    S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
+    S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
+    S3_ENDPOINT: process.env.S3_ENDPOINT,
   };
   cachedServer = env;
   return env;

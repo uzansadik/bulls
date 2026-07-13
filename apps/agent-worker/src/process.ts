@@ -36,6 +36,7 @@ import { type Logger, logger as pinoLogger } from "@openbulls/logger";
 import type { MarketDataServices } from "@openbulls/market-data";
 import type { NotificationServices } from "@openbulls/notifications";
 import type { PortfolioServices } from "@openbulls/portfolio";
+import type { ReportsServices } from "@openbulls/reports";
 
 import { createBillingAdapter } from "./infrastructure/billing-adapter";
 import { createJobsAdapter } from "./infrastructure/jobs-adapter";
@@ -44,6 +45,7 @@ import { createModelAdapter } from "./infrastructure/model-adapter";
 import { createPortfolioAdapter } from "./infrastructure/portfolio-adapter";
 import { makeAgentRunHandler } from "./job-handler";
 import { makeNotificationDispatchHandler } from "./notification-dispatch-handler";
+import { makeReportRenderHandler } from "./report-render-handler";
 import { makeScheduledJobDispatchHandler } from "./scheduled-job-dispatch-handler";
 
 /** Inputs the boot sequence needs. `services` come pre-wired by the caller. */
@@ -57,6 +59,7 @@ export interface ProcessMainInput {
   readonly userScheduledJobRepo: IUserScheduledJobRepository;
   readonly scheduledJobExecutionRepo: IScheduledJobExecutionRepository;
   readonly notificationServices: NotificationServices;
+  readonly reportsServices: ReportsServices;
   readonly consumer: import("@openbulls/jobs").IJobConsumer;
   readonly logger?: Logger;
 }
@@ -133,6 +136,13 @@ export async function processMain(input: ProcessMainInput): Promise<ProcessMainH
     "notification-dispatch",
     makeNotificationDispatchHandler({
       notificationServices: input.notificationServices,
+      logger: loggerLike,
+    }),
+  );
+  await input.consumer.process(
+    "report-render",
+    makeReportRenderHandler({
+      reports: input.reportsServices,
       logger: loggerLike,
     }),
   );
