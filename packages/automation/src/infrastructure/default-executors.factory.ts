@@ -65,6 +65,14 @@ const customAgentPayloadSchema = z.object({
   input: z.record(z.string(), z.unknown()).optional(),
 });
 
+const reportRenderPayloadSchema = z.object({
+  reportType: z.string().min(1),
+  format: z.enum(["pdf", "excel", "markdown"]),
+  parameters: z.record(z.string(), z.unknown()).default({}),
+  title: z.string().optional(),
+  locale: z.enum(["tr", "en"]).optional(),
+});
+
 // ── Payload value types ──────────────────────────────────────────────────
 //
 // These are the *post-default* shapes — what `buildPayload` returns
@@ -96,6 +104,13 @@ export interface CustomAgentPayload {
   input: Record<string, unknown>;
 }
 
+export interface ReportRenderPayload {
+  reportType: string;
+  format: "pdf" | "excel" | "markdown";
+  parameters: Record<string, unknown>;
+  title?: string;
+  locale?: string;
+}
 // ── Parser ───────────────────────────────────────────────────────────────
 
 function parse<T>(
@@ -317,6 +332,53 @@ export function createCustomAgentExecutor(deps: {
         kind: "agent-run",
         downstreamJobIds: [result.value.jobId],
         notes: `jobId=${result.value.jobId} threadId=${threadId}`,
+      };
+    },
+  };
+}
+
+// ── Report render executor (Faz 7) ────────────────────────────────────────
+//
+// Enqueues a `report-render` BullMQ job. The agent-worker picks it
+// up and runs `apps/agent-worker/src/report-render-handler.ts`,
+// which calls @openbulls/reports `renderReport` (insert → render →
+// upload → markReady). Format / type / parameters flow through
+// unchanged so the subgraph-prepared scratchpad and the report
+// orchestrator speak the same vocabulary.
+
+export function createReportRenderExecutor(deps: {
+  readonly jobs: JobsServices;
+}): IExecutor<ReportRenderPayload> {
+  const type: ExecutorType = "report_render";
+  return {
+    type,
+    buildPayload(raw): ReportRenderPayload {
+      const parsed = parse(type, reportRenderPayloadSchema, raw);
+      return {
+        reportType: parsed.reportType,
+        format: parsed.format,
+        parameters: parsed.parameters ?? {},
+        ...(parsed.title !== undefined ? { title: parsed.title } : {}),
+        ...(parsed.locale !== undefined ? { locale: parsed.locale } : {}),
+      };
+    },
+    async run(ctx) {
+      const result = await deps.jobs.enqueueReportRender({
+        userId: ctx.userId,
+        reportType: ctx.payload.reportType,
+        format: ctx.payload.format,
+        payload: ctx.payload.parameters,
+      });
+      if (!result.ok) {
+        ctx.logger.error("report_render: enqueueReportRender failed", {
+          err: result.error.message,
+        });
+        return { kind: "report", downstreamJobIds: [] };
+      }
+      return {
+        kind: "report",
+        downstreamJobIds: [result.value.jobId],
+        notes: `jobId=${result.value.jobId}`,
       };
     },
   };

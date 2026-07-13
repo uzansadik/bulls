@@ -155,6 +155,7 @@ export const jobExecutorTypeEnum = pgEnum("job_executor_type", [
   "news_watch",
   "earnings_calendar_watch",
   "custom_agent",
+  "report_render",
 ]);
 
 export const scheduledJobStatusEnum = pgEnum("scheduled_job_status", [
